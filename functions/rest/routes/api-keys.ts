@@ -43,10 +43,14 @@ apiKeyRoutes.post('/api-keys', auth, async (c) => {
 
         const id = crypto.randomUUID()
 
+        // JWT 中的 user.id 是第三方 ID（如 GitHub ID），不是数据库 users 表的主键
+        const dbUser = await c.env.DB.prepare('SELECT id FROM users WHERE login = ?').bind(user.login).first<{ id: number }>()
+        if (!dbUser) return c.json(Fail('User not found'), 404)
+
         await c.env.DB.prepare(
             `INSERT INTO api_keys (id, user_id, user_login, key_prefix, key_hash, name, expires_at) 
              VALUES (?, ?, ?, ?, ?, ?, ?)`
-        ).bind(id, user.id, user.login, prefix, hashHex, name, expires_at || null).run()
+        ).bind(id, dbUser.id, user.login, prefix, hashHex, name, expires_at || null).run()
 
         return c.json(Ok({
             id,
