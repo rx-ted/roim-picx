@@ -81,6 +81,28 @@ const router = createRouter({
 			]
 		},
 		{
+			path: '/privacy',
+			component: DefaultLayout,
+			children: [
+				{
+					path: '',
+					component: () => import('../views/PrivacyView.vue'),
+					meta: { public: true }
+				}
+			]
+		},
+		{
+			path: '/terms',
+			component: DefaultLayout,
+			children: [
+				{
+					path: '',
+					component: () => import('../views/TermsView.vue'),
+					meta: { public: true }
+				}
+			]
+		},
+		{
 			path: '/:path(.*)',
 			redirect: '/'
 		}
