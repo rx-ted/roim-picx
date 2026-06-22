@@ -465,7 +465,7 @@ export default {
         policyChangesTitle: 'Policy Changes',
         policyChangesContent: 'We may update this Privacy Policy from time to time. Updated versions will be posted on this page with a revised "Last updated" date. Material changes will be notified via the website or email.',
         contactTitle: 'Contact Us',
-        contactContent: 'If you have any questions about this Privacy Policy, please contact us:\nEmail: gjy.18sui@gmail.com\nGitHub Issues: https://github.com/roimdev/roim-picx/issues',
+        contactContent: 'If you have any questions about this Privacy Policy, please contact us: Email: gjy.18sui@gmail.com | GitHub Issues: https://github.com/roimdev/roim-picx/issues',
     },
     terms: {
         title: 'Terms of Service',
@@ -494,7 +494,7 @@ export default {
         changesTitle: 'Changes to Terms',
         changesContent: 'We reserve the right to modify these terms at any time. Revised terms will be posted on this page. Continued use of the Service after changes constitutes acceptance of the new terms.',
         contactTitle: 'Contact Us',
-        contactContent: 'For any questions about these Terms of Service, please contact us:\nEmail: gjy.18sui@gmail.com\nGitHub Issues: https://github.com/roimdev/roim-picx/issues',
+        contactContent: 'For any questions about these Terms of Service, please contact us: Email: gjy.18sui@gmail.com | GitHub Issues: https://github.com/roimdev/roim-picx/issues',
     },
     language: {
         zhCN: '简体中文',

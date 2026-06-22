@@ -466,7 +466,7 @@ export default {
         policyChangesTitle: '政策更新',
         policyChangesContent: '我们可能会不时更新本隐私政策。更新后的政策将在本页面发布，并注明最后更新日期。重大变更我们会通过网站通知或电子邮件等方式告知您。',
         contactTitle: '联系我们',
-        contactContent: '如果您对本隐私政策有任何疑问或关切，请通过以下方式联系我们：\n邮箱：gjy.18sui@gmail.com\nGitHub Issues：https://github.com/roimdev/roim-picx/issues',
+        contactContent: '如果您对本隐私政策有任何疑问或关切，请通过以下方式联系我们：邮箱：gjy.18sui@gmail.com GitHub Issues：https://github.com/roimdev/roim-picx/issues',
     },
     terms: {
         title: '服务条款',
@@ -495,7 +495,7 @@ export default {
         changesTitle: '条款变更',
         changesContent: '我们保留随时修改本服务条款的权利。修改后的条款将在本页面公布。继续使用本服务即表示您接受修改后的条款。',
         contactTitle: '联系我们',
-        contactContent: '如对本服务条款有任何疑问，请通过以下方式联系我们：\n邮箱：gjy.18sui@gmail.com\nGitHub Issues：https://github.com/roimdev/roim-picx/issues',
+        contactContent: '如对本服务条款有任何疑问，请通过以下方式联系我们：邮箱：gjy.18sui@gmail.com GitHub Issues：https://github.com/roimdev/roim-picx/issues',
     },
     language: {
         zhCN: '简体中文',
