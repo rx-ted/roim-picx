@@ -5,13 +5,14 @@ import en from 'element-plus/es/locale/lang/en'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { initTheme } from './utils/theme'
+import { SITE_NAME } from './config'
 
 const { locale } = useI18n()
 
 // Element Plus locale based on current i18n locale
 const elLocale = computed(() => locale.value.startsWith('zh') ? zhCn : en)
 
-const appName = 'PICX'
+const appName = SITE_NAME
 document.title = appName
 
 onMounted(() => {
