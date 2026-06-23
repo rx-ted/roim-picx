@@ -60,11 +60,20 @@
 
       <section class="mb-8">
         <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">{{ $t('terms.contactTitle') }}</h2>
-        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">{{ $t('terms.contactContent') }}</p>
+        <i18n-t keypath="terms.contactContent" tag="p" class="text-gray-600 dark:text-gray-400 leading-relaxed">
+          <template #email>
+            <a :href="`mailto:${email}`" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ email }}</a>
+          </template>
+          <template #url>
+            <a :href="url" target="_blank" rel="noopener" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ url }}</a>
+          </template>
+        </i18n-t>
       </section>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+const email = 'gjy.18sui@gmail.com'
+const url = 'https://github.com/roimdev/roim-picx/issues'
 </script>
