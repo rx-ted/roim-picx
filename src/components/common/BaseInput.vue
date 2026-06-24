@@ -1,27 +1,30 @@
 <script setup lang="ts">
-const props = withDefaults(defineProps<{
-    modelValue: string | number | null | undefined
-    type?: string
-    placeholder?: string
-    readonly?: boolean
-    disabled?: boolean
-    label?: string
-    error?: string
-    rows?: number
-}>(), {
+const props = withDefaults(
+  defineProps<{
+    modelValue: string | number | null | undefined;
+    type?: string;
+    placeholder?: string;
+    readonly?: boolean;
+    disabled?: boolean;
+    label?: string;
+    error?: string;
+    rows?: number;
+  }>(),
+  {
     type: 'text',
     placeholder: '',
     readonly: false,
     disabled: false,
-    rows: 3
-})
+    rows: 3,
+  },
+);
 
-const emit = defineEmits(['update:modelValue', 'blur', 'focus', 'clear'])
+const emit = defineEmits(['update:modelValue', 'blur', 'focus', 'clear']);
 
 const handleInput = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    emit('update:modelValue', target.value)
-}
+  const target = e.target as HTMLInputElement;
+  emit('update:modelValue', target.value);
+};
 </script>
 
 <template>

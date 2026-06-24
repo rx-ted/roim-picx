@@ -28,22 +28,22 @@
 </template>
 
 <script setup lang="ts">
-import { ElMessage, ElTabs, ElTabPane } from 'element-plus'
-import { ref, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
-import type { TabsPaneContext } from 'element-plus'
-import ImageItem from '../components/ImageItem.vue'
-import type { ImgItem } from '../utils/types'
-import copy from 'copy-to-clipboard'
-import { faCopy } from '@fortawesome/free-regular-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { ElMessage, ElTabs, ElTabPane } from 'element-plus';
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+import type { TabsPaneContext } from 'element-plus';
+import ImageItem from '../components/ImageItem.vue';
+import type { ImgItem } from '../utils/types';
+import copy from 'copy-to-clipboard';
+import { faCopy } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const props = defineProps<{
-  imageList: ImgItem[]
-}>()
+  imageList: ImgItem[];
+}>();
 
-const activeName = ref('first')
+const activeName = ref('first');
 
 const availableTabs = computed(() => {
   const tabs = [
@@ -51,75 +51,81 @@ const availableTabs = computed(() => {
     { name: 'markdown', label: 'Markdown' },
     { name: 'bbcode', label: 'BBCode' },
     { name: 'link', label: 'Link' },
-  ]
+  ];
 
-  if (props.imageList.some(it => it.delToken)) {
-    tabs.push({ name: 'delete', label: t('upload.deleteLinks') })
+  if (props.imageList.some((it) => it.delToken)) {
+    tabs.push({ name: 'delete', label: t('upload.deleteLinks') });
   }
 
-  return tabs
-})
+  return tabs;
+});
 
 function getTabContent(name: string) {
   switch (name) {
-    case 'html': return htmlLinks()
-    case 'markdown': return markdownLinks()
-    case 'bbcode': return bbcodeLinks()
-    case 'link': return viewLinks()
-    case 'delete': return deleteLinks()
-    default: return ''
+    case 'html':
+      return htmlLinks();
+    case 'markdown':
+      return markdownLinks();
+    case 'bbcode':
+      return bbcodeLinks();
+    case 'link':
+      return viewLinks();
+    case 'delete':
+      return deleteLinks();
+    default:
+      return '';
   }
 }
 
 function htmlLinks() {
-  let text = ''
+  let text = '';
   for (const it of props.imageList) {
-    text += `<a href="${it.url}" target="_blank"><img src="${it.url}"></a>\n`
+    text += `<a href="${it.url}" target="_blank"><img src="${it.url}"></a>\n`;
   }
-  return text
+  return text;
 }
 
 function viewLinks() {
-  let text = ''
+  let text = '';
   for (const it of props.imageList) {
-    text += `${it.url}\n`
+    text += `${it.url}\n`;
   }
-  return text
+  return text;
 }
 
 function markdownLinks() {
-  let text = ''
+  let text = '';
   for (const it of props.imageList) {
-    text += `![${it.filename || it.key}](${it.url})\n`
+    text += `![${it.filename || it.key}](${it.url})\n`;
   }
-  return text
+  return text;
 }
 
 function bbcodeLinks() {
-  let text = ''
+  let text = '';
   for (const it of props.imageList) {
-    text += `[img]${it.url}[/img]\n`
+    text += `[img]${it.url}[/img]\n`;
   }
-  return text
+  return text;
 }
 
 function deleteLinks() {
-  let text = ''
-  const origin = window.location.origin
+  let text = '';
+  const origin = window.location.origin;
   for (const it of props.imageList) {
     if (it.delToken) {
-      text += `${origin}/delete/${it.delToken}\n`
+      text += `${origin}/delete/${it.delToken}\n`;
     }
   }
-  return text
+  return text;
 }
 
 function copyText(text: string) {
-  const res = copy(text)
+  const res = copy(text);
   if (res) {
-    ElMessage.success(t('upload.copyToClipboard'))
+    ElMessage.success(t('upload.copyToClipboard'));
   } else {
-    ElMessage.error(t('upload.copyFailedManual'))
+    ElMessage.error(t('upload.copyFailedManual'));
   }
 }
 

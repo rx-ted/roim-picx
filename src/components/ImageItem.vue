@@ -51,38 +51,38 @@
 </template>
 
 <script setup lang="ts">
-import type { ImgItem } from '../utils/types'
-import copy from 'copy-to-clipboard'
-import { ElImage, ElMessage } from 'element-plus'
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
-import { faCopy } from '@fortawesome/free-regular-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import type { ImgItem } from '../utils/types';
+import copy from 'copy-to-clipboard';
+import { ElImage, ElMessage } from 'element-plus';
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+import { faCopy } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const props = defineProps<{
-  imageList: ImgItem[]
-}>()
-const imageError = ref(false)
-const loading = ref(false)
+  imageList: ImgItem[];
+}>();
+const imageError = ref(false);
+const loading = ref(false);
 
 const markdownLink = (link: string, filename: string) => {
-  return `![${filename}](${link})`
-}
+  return `![${filename}](${link})`;
+};
 const bbcodeLink = (link: string, filename: string) => {
-  return `[img]${link}[/img]`
-}
+  return `[img]${link}[/img]`;
+};
 const htmlLink = (link: string, filename: string) => {
-  return `<a href="${link}" target="_blank" title="${filename}"><img src="${link}"></a>`
-}
+  return `<a href="${link}" target="_blank" title="${filename}"><img src="${link}"></a>`;
+};
 
 const copyLink = (event: any) => {
-  const res = copy(event.target.value)
+  const res = copy(event.target.value);
   if (res) {
-    ElMessage.success(t('manage.copySuccess'))
-    event.target.select()
+    ElMessage.success(t('manage.copySuccess'));
+    event.target.select();
   } else {
-    ElMessage.error(t('manage.copyFailed'))
+    ElMessage.error(t('manage.copyFailed'));
   }
-}
+};
 </script>

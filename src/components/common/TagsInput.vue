@@ -20,48 +20,49 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faTimes } from '@fortawesome/free-solid-svg-icons'
+import { ref } from 'vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
-const props = withDefaults(defineProps<{
-    modelValue: string[]
-    placeholder?: string
-    hint?: string
-    maxTags?: number
-}>(), {
+const props = withDefaults(
+  defineProps<{
+    modelValue: string[];
+    placeholder?: string;
+    hint?: string;
+    maxTags?: number;
+  }>(),
+  {
     placeholder: '',
     hint: '',
-    maxTags: 10
-})
+    maxTags: 10,
+  },
+);
 
-const emit = defineEmits<{
-    (e: 'update:modelValue', value: string[]): void
-}>()
+const emit = defineEmits<(e: 'update:modelValue', value: string[]) => void>();
 
-const inputValue = ref('')
+const inputValue = ref('');
 
 const addTag = () => {
-    const value = inputValue.value.trim()
-    if (!value) return
-    if (props.modelValue.length >= props.maxTags) return
-    if (props.modelValue.includes(value)) {
-        inputValue.value = ''
-        return
-    }
-    emit('update:modelValue', [...props.modelValue, value])
-    inputValue.value = ''
-}
+  const value = inputValue.value.trim();
+  if (!value) return;
+  if (props.modelValue.length >= props.maxTags) return;
+  if (props.modelValue.includes(value)) {
+    inputValue.value = '';
+    return;
+  }
+  emit('update:modelValue', [...props.modelValue, value]);
+  inputValue.value = '';
+};
 
 const removeTag = (index: number) => {
-    const newTags = [...props.modelValue]
-    newTags.splice(index, 1)
-    emit('update:modelValue', newTags)
-}
+  const newTags = [...props.modelValue];
+  newTags.splice(index, 1);
+  emit('update:modelValue', newTags);
+};
 
 const handleBackspace = () => {
-    if (inputValue.value === '' && props.modelValue.length > 0) {
-        removeTag(props.modelValue.length - 1)
-    }
-}
+  if (inputValue.value === '' && props.modelValue.length > 0) {
+    removeTag(props.modelValue.length - 1);
+  }
+};
 </script>

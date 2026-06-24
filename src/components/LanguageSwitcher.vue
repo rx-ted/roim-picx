@@ -33,37 +33,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { setLocale, availableLocales } from '../locales'
-import { faGlobe, faChevronDown, faCheck } from '@fortawesome/free-solid-svg-icons'
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { setLocale, availableLocales } from '../locales';
+import { faGlobe, faChevronDown, faCheck } from '@fortawesome/free-solid-svg-icons';
 
-const { locale } = useI18n()
-const isOpen = ref(false)
-const dropdownRef = ref<HTMLElement | null>(null)
+const { locale } = useI18n();
+const isOpen = ref(false);
+const dropdownRef = ref<HTMLElement | null>(null);
 
-const currentLocale = computed(() => locale.value)
+const currentLocale = computed(() => locale.value);
 const currentLocaleName = computed(() => {
-  const found = availableLocales.find(l => l.code === locale.value)
-  return found?.name || locale.value
-})
+  const found = availableLocales.find((l) => l.code === locale.value);
+  return found?.name || locale.value;
+});
 
 const changeLocale = (code: string) => {
-  setLocale(code)
-  isOpen.value = false
-}
+  setLocale(code);
+  isOpen.value = false;
+};
 
 const handleClickOutside = (event: MouseEvent) => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
-    isOpen.value = false
+    isOpen.value = false;
   }
-}
+};
 
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
+  document.addEventListener('click', handleClickOutside);
+});
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>

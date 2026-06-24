@@ -1,262 +1,283 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch, nextTick, type CSSProperties } from 'vue'
-import { faCalendarAlt, faChevronLeft, faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import BaseInput from './BaseInput.vue'
-import BaseButton from './BaseButton.vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick, type CSSProperties } from 'vue';
+import {
+  faCalendarAlt,
+  faChevronLeft,
+  faChevronRight,
+  faClock,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import BaseInput from './BaseInput.vue';
+import BaseButton from './BaseButton.vue';
 
 interface Props {
-    modelValue?: Date | number
-    placeholder?: string
-    disabledDate?: (date: Date) => boolean
-    format?: string
+  modelValue?: Date | number;
+  placeholder?: string;
+  disabledDate?: (date: Date) => boolean;
+  format?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    format: 'YYYY-MM-DD HH:mm'
-})
+  format: 'YYYY-MM-DD HH:mm',
+});
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue']);
 
-const isOpen = ref(false)
-const containerRef = ref<HTMLElement | null>(null)
-const dropdownRef = ref<HTMLElement | null>(null)
-const dropdownPosition = ref<CSSProperties>({})
+const isOpen = ref(false);
+const containerRef = ref<HTMLElement | null>(null);
+const dropdownRef = ref<HTMLElement | null>(null);
+const dropdownPosition = ref<CSSProperties>({});
 
 // Mobile detection
-const isMobile = ref(false)
+const isMobile = ref(false);
 
 const checkMobile = () => {
-    isMobile.value = window.innerWidth < 640
-}
+  isMobile.value = window.innerWidth < 640;
+};
 
 const updatePosition = async () => {
-    if (!containerRef.value || !isOpen.value) return
+  if (!containerRef.value || !isOpen.value) return;
 
-    checkMobile()
+  checkMobile();
 
-    if (isMobile.value) {
-        // Mobile: Fixed center position
-        dropdownPosition.value = {
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '90%',
-            maxWidth: '320px',
-            zIndex: 9999
-        }
-        return
-    }
+  if (isMobile.value) {
+    // Mobile: Fixed center position
+    dropdownPosition.value = {
+      position: 'fixed',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '90%',
+      maxWidth: '320px',
+      zIndex: 9999,
+    };
+    return;
+  }
 
-    await nextTick()
-    const rect = containerRef.value.getBoundingClientRect()
-    const dropdownHeight = 420 // Approximate max height with margin
-    const spaceBelow = window.innerHeight - rect.bottom
-    const spaceAbove = rect.top
+  await nextTick();
+  const rect = containerRef.value.getBoundingClientRect();
+  const dropdownHeight = 420; // Approximate max height with margin
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const spaceAbove = rect.top;
 
-    let left = rect.left
-    // Clamp left to ensure it stays on screen
-    left = Math.max(10, Math.min(left, window.innerWidth - 330))
+  let left = rect.left;
+  // Clamp left to ensure it stays on screen
+  left = Math.max(10, Math.min(left, window.innerWidth - 330));
 
-    // Vertical check - flip if not enough space below but enough above
-    if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
-        // Show above
-        const scrollTop = window.scrollY || document.documentElement.scrollTop
+  // Vertical check - flip if not enough space below but enough above
+  if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+    // Show above
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-        dropdownPosition.value = {
-            position: 'absolute',
-            left: `${left}px`,
-            top: 'auto',
-            bottom: `${window.innerHeight - rect.top - scrollTop + 5}px`, // 5px gap relative to document
-            transformOrigin: 'center bottom',
-            zIndex: 9999
-        }
-    } else {
-        // Show below
-        const scrollTop = window.scrollY || document.documentElement.scrollTop
-        dropdownPosition.value = {
-            position: 'absolute',
-            left: `${left}px`,
-            top: `${rect.bottom + scrollTop + 5}px`,
-            transformOrigin: 'center top',
-            zIndex: 9999
-        }
-    }
-}
+    dropdownPosition.value = {
+      position: 'absolute',
+      left: `${left}px`,
+      top: 'auto',
+      bottom: `${window.innerHeight - rect.top - scrollTop + 5}px`, // 5px gap relative to document
+      transformOrigin: 'center bottom',
+      zIndex: 9999,
+    };
+  } else {
+    // Show below
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    dropdownPosition.value = {
+      position: 'absolute',
+      left: `${left}px`,
+      top: `${rect.bottom + scrollTop + 5}px`,
+      transformOrigin: 'center top',
+      zIndex: 9999,
+    };
+  }
+};
 
 watch(isOpen, (val) => {
-    if (val) {
-        updatePosition()
-        window.addEventListener('scroll', closeDropdown)
-        window.addEventListener('resize', closeDropdown)
-    } else {
-        window.removeEventListener('scroll', closeDropdown)
-        window.removeEventListener('resize', closeDropdown)
-    }
-})
+  if (val) {
+    updatePosition();
+    window.addEventListener('scroll', closeDropdown);
+    window.addEventListener('resize', closeDropdown);
+  } else {
+    window.removeEventListener('scroll', closeDropdown);
+    window.removeEventListener('resize', closeDropdown);
+  }
+});
 
 const closeDropdown = () => {
-    isOpen.value = false
-}
+  isOpen.value = false;
+};
 
 // Current view state
-const currentYear = ref(new Date().getFullYear())
-const currentMonth = ref(new Date().getMonth())
+const currentYear = ref(new Date().getFullYear());
+const currentMonth = ref(new Date().getMonth());
 
-const selectedDate = ref<Date | null>(null)
+const selectedDate = ref<Date | null>(null);
 
 // Time state
-const selectedHour = ref(new Date().getHours())
-const selectedMinute = ref(new Date().getMinutes())
+const selectedHour = ref(new Date().getHours());
+const selectedMinute = ref(new Date().getMinutes());
 
 // Month names
 const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-]
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 
-const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 // Initialize from modelValue
-watch(() => props.modelValue, (val) => {
+watch(
+  () => props.modelValue,
+  (val) => {
     if (val) {
-        const date = new Date(val)
-        selectedDate.value = date
-        currentYear.value = date.getFullYear()
-        currentMonth.value = date.getMonth()
-        selectedHour.value = date.getHours()
-        selectedMinute.value = date.getMinutes()
+      const date = new Date(val);
+      selectedDate.value = date;
+      currentYear.value = date.getFullYear();
+      currentMonth.value = date.getMonth();
+      selectedHour.value = date.getHours();
+      selectedMinute.value = date.getMinutes();
     }
-}, { immediate: true })
+  },
+  { immediate: true },
+);
 
 const formattedValue = computed(() => {
-    if (!props.modelValue) return ''
-    const date = new Date(props.modelValue)
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const hour = String(date.getHours()).padStart(2, '0')
-    const minute = String(date.getMinutes()).padStart(2, '0')
-    return `${year}-${month}-${day} ${hour}:${minute}`
-})
+  if (!props.modelValue) return '';
+  const date = new Date(props.modelValue);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hour = String(date.getHours()).padStart(2, '0');
+  const minute = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hour}:${minute}`;
+});
 
 const calendarDays = computed(() => {
-    const days = []
-    const firstDay = new Date(currentYear.value, currentMonth.value, 1)
-    const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0)
+  const days = [];
+  const firstDay = new Date(currentYear.value, currentMonth.value, 1);
+  const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0);
 
-    // Previous month filler
-    const startPadding = firstDay.getDay()
-    const prevMonthLastDay = new Date(currentYear.value, currentMonth.value, 0).getDate()
+  // Previous month filler
+  const startPadding = firstDay.getDay();
+  const prevMonthLastDay = new Date(currentYear.value, currentMonth.value, 0).getDate();
 
-    for (let i = startPadding - 1; i >= 0; i--) {
-        days.push({
-            day: prevMonthLastDay - i,
-            currentMonth: false,
-            date: new Date(currentYear.value, currentMonth.value - 1, prevMonthLastDay - i)
-        })
-    }
+  for (let i = startPadding - 1; i >= 0; i--) {
+    days.push({
+      day: prevMonthLastDay - i,
+      currentMonth: false,
+      date: new Date(currentYear.value, currentMonth.value - 1, prevMonthLastDay - i),
+    });
+  }
 
-    // Current month days
-    for (let i = 1; i <= lastDay.getDate(); i++) {
-        days.push({
-            day: i,
-            currentMonth: true,
-            date: new Date(currentYear.value, currentMonth.value, i)
-        })
-    }
+  // Current month days
+  for (let i = 1; i <= lastDay.getDate(); i++) {
+    days.push({
+      day: i,
+      currentMonth: true,
+      date: new Date(currentYear.value, currentMonth.value, i),
+    });
+  }
 
-    // Next month filler
-    const remainingSlots = 42 - days.length // 6 rows * 7 days
-    for (let i = 1; i <= remainingSlots; i++) {
-        days.push({
-            day: i,
-            currentMonth: false,
-            date: new Date(currentYear.value, currentMonth.value + 1, i)
-        })
-    }
+  // Next month filler
+  const remainingSlots = 42 - days.length; // 6 rows * 7 days
+  for (let i = 1; i <= remainingSlots; i++) {
+    days.push({
+      day: i,
+      currentMonth: false,
+      date: new Date(currentYear.value, currentMonth.value + 1, i),
+    });
+  }
 
-    return days
-})
+  return days;
+});
 
 const isDateDisabled = (date: Date) => {
-    if (props.disabledDate) {
-        return props.disabledDate(date)
-    }
-    return false
-}
+  if (props.disabledDate) {
+    return props.disabledDate(date);
+  }
+  return false;
+};
 
 const isSelected = (date: Date) => {
-    if (!selectedDate.value) return false
-    return date.toDateString() === selectedDate.value.toDateString()
-}
+  if (!selectedDate.value) return false;
+  return date.toDateString() === selectedDate.value.toDateString();
+};
 
 const isToday = (date: Date) => {
-    return date.toDateString() === new Date().toDateString()
-}
+  return date.toDateString() === new Date().toDateString();
+};
 
 const prevMonth = () => {
-    if (currentMonth.value === 0) {
-        currentMonth.value = 11
-        currentYear.value--
-    } else {
-        currentMonth.value--
-    }
-}
+  if (currentMonth.value === 0) {
+    currentMonth.value = 11;
+    currentYear.value--;
+  } else {
+    currentMonth.value--;
+  }
+};
 
 const nextMonth = () => {
-    if (currentMonth.value === 11) {
-        currentMonth.value = 0
-        currentYear.value++
-    } else {
-        currentMonth.value++
-    }
-}
+  if (currentMonth.value === 11) {
+    currentMonth.value = 0;
+    currentYear.value++;
+  } else {
+    currentMonth.value++;
+  }
+};
 
-const selectDate = (day: { date: Date, currentMonth: boolean }) => {
-    if (isDateDisabled(day.date)) return
+const selectDate = (day: { date: Date; currentMonth: boolean }) => {
+  if (isDateDisabled(day.date)) return;
 
-    if (!day.currentMonth) {
-        currentMonth.value = day.date.getMonth()
-        currentYear.value = day.date.getFullYear()
-    }
+  if (!day.currentMonth) {
+    currentMonth.value = day.date.getMonth();
+    currentYear.value = day.date.getFullYear();
+  }
 
-    selectedDate.value = day.date
-}
+  selectedDate.value = day.date;
+};
 
 const confirmSelection = () => {
-    if (!selectedDate.value) return
+  if (!selectedDate.value) return;
 
-    const finalDate = new Date(selectedDate.value)
-    finalDate.setHours(selectedHour.value)
-    finalDate.setMinutes(selectedMinute.value)
-    finalDate.setSeconds(0)
-    finalDate.setMilliseconds(0)
+  const finalDate = new Date(selectedDate.value);
+  finalDate.setHours(selectedHour.value);
+  finalDate.setMinutes(selectedMinute.value);
+  finalDate.setSeconds(0);
+  finalDate.setMilliseconds(0);
 
-    emit('update:modelValue', finalDate)
-    isOpen.value = false
-}
+  emit('update:modelValue', finalDate);
+  isOpen.value = false;
+};
 
 const handleClickOutside = (event: MouseEvent) => {
-    const target = event.target as Node
-    if (
-        containerRef.value && !containerRef.value.contains(target) &&
-        dropdownRef.value && !dropdownRef.value.contains(target)
-    ) {
-        isOpen.value = false
-    }
-}
+  const target = event.target as Node;
+  if (
+    containerRef.value &&
+    !containerRef.value.contains(target) &&
+    dropdownRef.value &&
+    !dropdownRef.value.contains(target)
+  ) {
+    isOpen.value = false;
+  }
+};
 
 onMounted(() => {
-    document.addEventListener('click', handleClickOutside)
-})
+  document.addEventListener('click', handleClickOutside);
+});
 
 onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside)
-})
+  document.removeEventListener('click', handleClickOutside);
+});
 
-const padZero = (num: number) => String(num).padStart(2, '0')
+const padZero = (num: number) => String(num).padStart(2, '0');
 </script>
 
 <template>

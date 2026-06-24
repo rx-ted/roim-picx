@@ -1,26 +1,28 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
+import { useI18n } from 'vue-i18n';
+import { ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus';
 import {
-    ElDropdown, ElDropdownMenu, ElDropdownItem
-} from 'element-plus'
-import {
-    faFolder, faEllipsisVertical, faPen, faTrash, faShareNodes
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import type { Album } from '../../utils/types'
+  faFolder,
+  faEllipsisVertical,
+  faPen,
+  faTrash,
+  faShareNodes,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import type { Album } from '../../utils/types';
 
 const props = defineProps<{
-    album: Album
-}>()
+  album: Album;
+}>();
 
 const emit = defineEmits<{
-    (e: 'click'): void
-    (e: 'share'): void
-    (e: 'edit'): void
-    (e: 'delete'): void
-}>()
+  (e: 'click'): void;
+  (e: 'share'): void;
+  (e: 'edit'): void;
+  (e: 'delete'): void;
+}>();
 
-const { t } = useI18n()
+const { t } = useI18n();
 </script>
 
 <template>

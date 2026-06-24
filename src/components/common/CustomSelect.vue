@@ -1,94 +1,100 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, nextTick, type CSSProperties } from 'vue'
-import { faChevronDown, faCheck } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { ref, watch, onMounted, onUnmounted, nextTick, type CSSProperties } from 'vue';
+import { faChevronDown, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 interface Option {
-    label: string
-    value: string | number
-    icon?: any // FontAwesome icon or component
-    [key: string]: any
+  label: string;
+  value: string | number;
+  icon?: any; // FontAwesome icon or component
+  [key: string]: any;
 }
 
 const props = defineProps<{
-    modelValue: string | number | undefined
-    options: Option[]
-    placeholder?: string
-    disabled?: boolean
-}>()
+  modelValue: string | number | undefined;
+  options: Option[];
+  placeholder?: string;
+  disabled?: boolean;
+}>();
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits(['update:modelValue', 'change']);
 
-const isOpen = ref(false)
-const containerRef = ref<HTMLElement | null>(null)
-const dropdownRef = ref<HTMLElement | null>(null)
-const dropdownPosition = ref<CSSProperties>({})
+const isOpen = ref(false);
+const containerRef = ref<HTMLElement | null>(null);
+const dropdownRef = ref<HTMLElement | null>(null);
+const dropdownPosition = ref<CSSProperties>({});
 
-const selectedOption = ref<Option | undefined>(undefined)
+const selectedOption = ref<Option | undefined>(undefined);
 
-watch(() => props.modelValue, (val) => {
-    selectedOption.value = props.options.find(opt => opt.value === val)
-}, { immediate: true })
+watch(
+  () => props.modelValue,
+  (val) => {
+    selectedOption.value = props.options.find((opt) => opt.value === val);
+  },
+  { immediate: true },
+);
 
 const updatePosition = async () => {
-    if (!containerRef.value || !isOpen.value) return
+  if (!containerRef.value || !isOpen.value) return;
 
-    await nextTick()
-    const rect = containerRef.value.getBoundingClientRect()
-    const scrollTop = window.scrollY || document.documentElement.scrollTop
-    const scrollLeft = window.scrollX || document.documentElement.scrollLeft
+  await nextTick();
+  const rect = containerRef.value.getBoundingClientRect();
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
 
-    dropdownPosition.value = {
-        position: 'absolute',
-        top: `${rect.bottom + scrollTop + 4}px`,
-        left: `${rect.left + scrollLeft}px`,
-        width: `${rect.width}px`,
-        zIndex: 9999
-    }
-}
+  dropdownPosition.value = {
+    position: 'absolute',
+    top: `${rect.bottom + scrollTop + 4}px`,
+    left: `${rect.left + scrollLeft}px`,
+    width: `${rect.width}px`,
+    zIndex: 9999,
+  };
+};
 
 const toggleDropdown = () => {
-    if (props.disabled) return
-    isOpen.value = !isOpen.value
-}
+  if (props.disabled) return;
+  isOpen.value = !isOpen.value;
+};
 
 watch(isOpen, (val) => {
-    if (val) {
-        updatePosition()
-        window.addEventListener('scroll', updatePosition, { passive: true })
-        window.addEventListener('resize', updatePosition)
-    } else {
-        window.removeEventListener('scroll', updatePosition)
-        window.removeEventListener('resize', updatePosition)
-    }
-})
+  if (val) {
+    updatePosition();
+    window.addEventListener('scroll', updatePosition, { passive: true });
+    window.addEventListener('resize', updatePosition);
+  } else {
+    window.removeEventListener('scroll', updatePosition);
+    window.removeEventListener('resize', updatePosition);
+  }
+});
 
 const selectOption = (option: Option) => {
-    emit('update:modelValue', option.value)
-    emit('change', option.value)
-    isOpen.value = false
-}
+  emit('update:modelValue', option.value);
+  emit('change', option.value);
+  isOpen.value = false;
+};
 
 // Click outside to close
 const handleClickOutside = (event: MouseEvent) => {
-    const target = event.target as Node
-    if (
-        containerRef.value && !containerRef.value.contains(target) &&
-        dropdownRef.value && !dropdownRef.value.contains(target)
-    ) {
-        isOpen.value = false
-    }
-}
+  const target = event.target as Node;
+  if (
+    containerRef.value &&
+    !containerRef.value.contains(target) &&
+    dropdownRef.value &&
+    !dropdownRef.value.contains(target)
+  ) {
+    isOpen.value = false;
+  }
+};
 
 onMounted(() => {
-    document.addEventListener('click', handleClickOutside)
-})
+  document.addEventListener('click', handleClickOutside);
+});
 
 onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside)
-    window.removeEventListener('scroll', updatePosition)
-    window.removeEventListener('resize', updatePosition)
-})
+  document.removeEventListener('click', handleClickOutside);
+  window.removeEventListener('scroll', updatePosition);
+  window.removeEventListener('resize', updatePosition);
+});
 </script>
 
 <template>

@@ -1,93 +1,93 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage, ElCard, ElTable, ElTableColumn } from 'element-plus'
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage, ElCard, ElTable, ElTableColumn } from 'element-plus';
+import { faPlus, faSave, faTrash, faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
+import BaseButton from '../common/BaseButton.vue';
+import BaseInput from '../common/BaseInput.vue';
 import {
-    faPlus, faSave, faTrash, faQuestionCircle
-} from '@fortawesome/free-solid-svg-icons'
-import BaseButton from '../common/BaseButton.vue'
-import BaseInput from '../common/BaseInput.vue'
-import {
-    requestGetUploadConfig, requestUpdateUploadConfig,
-    requestGetTokenExpire, requestUpdateTokenExpire
-} from '../../utils/request'
-import type { UploadConfigItem } from '../../utils/types'
+  requestGetUploadConfig,
+  requestUpdateUploadConfig,
+  requestGetTokenExpire,
+  requestUpdateTokenExpire,
+} from '../../utils/request';
+import type { UploadConfigItem } from '../../utils/types';
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 // 系统设置
-const uploadConfig = ref<UploadConfigItem[]>([])
-const configLoading = ref(false)
+const uploadConfig = ref<UploadConfigItem[]>([]);
+const configLoading = ref(false);
 
 const loadSettings = async () => {
-    configLoading.value = true
-    try {
-        uploadConfig.value = await requestGetUploadConfig()
-    } catch (e) {
-        console.error('Failed to load settings:', e)
-    } finally {
-        configLoading.value = false
-    }
-}
+  configLoading.value = true;
+  try {
+    uploadConfig.value = await requestGetUploadConfig();
+  } catch (e) {
+    console.error('Failed to load settings:', e);
+  } finally {
+    configLoading.value = false;
+  }
+};
 
 const saveSettings = async () => {
-    configLoading.value = true
-    try {
-        await requestUpdateUploadConfig(uploadConfig.value)
-        ElMessage.success(t('common.saveSuccess'))
-    } catch (e) {
-        console.error('Failed to save settings:', e)
-    } finally {
-        configLoading.value = false
-    }
-}
+  configLoading.value = true;
+  try {
+    await requestUpdateUploadConfig(uploadConfig.value);
+    ElMessage.success(t('common.saveSuccess'));
+  } catch (e) {
+    console.error('Failed to save settings:', e);
+  } finally {
+    configLoading.value = false;
+  }
+};
 
 const addConfigItem = () => {
-    uploadConfig.value.push({ type: '', ext: '' })
-}
+  uploadConfig.value.push({ type: '', ext: '' });
+};
 
 const removeConfigItem = (index: number) => {
-    uploadConfig.value.splice(index, 1)
-}
+  uploadConfig.value.splice(index, 1);
+};
 
 // Token Expiration
-const tokenExpireDays = ref(7)
-const tokenLoading = ref(false)
+const tokenExpireDays = ref(7);
+const tokenLoading = ref(false);
 
 const loadTokenExpire = async () => {
-    tokenLoading.value = true
-    try {
-        const res = await requestGetTokenExpire()
-        tokenExpireDays.value = res.days
-    } catch (e) {
-        console.error('Failed to load token expire:', e)
-    } finally {
-        tokenLoading.value = false
-    }
-}
+  tokenLoading.value = true;
+  try {
+    const res = await requestGetTokenExpire();
+    tokenExpireDays.value = res.days;
+  } catch (e) {
+    console.error('Failed to load token expire:', e);
+  } finally {
+    tokenLoading.value = false;
+  }
+};
 
 const saveTokenExpire = async () => {
-    tokenLoading.value = true
-    try {
-        await requestUpdateTokenExpire(Number(tokenExpireDays.value))
-        ElMessage.success(t('common.saveSuccess'))
-    } catch (e) {
-        console.error('Failed to save token expire:', e)
-        ElMessage.error(t('common.saveFailed') || 'Save failed')
-    } finally {
-        tokenLoading.value = false
-    }
-}
+  tokenLoading.value = true;
+  try {
+    await requestUpdateTokenExpire(Number(tokenExpireDays.value));
+    ElMessage.success(t('common.saveSuccess'));
+  } catch (e) {
+    console.error('Failed to save token expire:', e);
+    ElMessage.error(t('common.saveFailed') || 'Save failed');
+  } finally {
+    tokenLoading.value = false;
+  }
+};
 
 defineExpose({
-    loadSettings,
-    init: () => {
-        if (uploadConfig.value.length === 0) {
-            loadSettings()
-            loadTokenExpire()
-        }
+  loadSettings,
+  init: () => {
+    if (uploadConfig.value.length === 0) {
+      loadSettings();
+      loadTokenExpire();
     }
-})
+  },
+});
 </script>
 
 <template>

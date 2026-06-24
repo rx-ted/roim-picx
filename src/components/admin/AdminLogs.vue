@@ -1,94 +1,94 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElTable, ElTableColumn, ElTag, ElTooltip, ElPagination } from 'element-plus'
-import { faSearch } from '@fortawesome/free-solid-svg-icons'
-import { requestAuditLogs } from '../../utils/request'
-import type { AuditLog } from '../../utils/types'
-import BaseInput from '../common/BaseInput.vue'
-import BaseButton from '../common/BaseButton.vue'
-import CustomSelect from '../common/CustomSelect.vue'
-import { computed } from 'vue'
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElTable, ElTableColumn, ElTag, ElTooltip, ElPagination } from 'element-plus';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { requestAuditLogs } from '../../utils/request';
+import type { AuditLog } from '../../utils/types';
+import BaseInput from '../common/BaseInput.vue';
+import BaseButton from '../common/BaseButton.vue';
+import CustomSelect from '../common/CustomSelect.vue';
+import { computed } from 'vue';
 
-const { t, tm, locale } = useI18n()
+const { t, tm, locale } = useI18n();
 
-const loading = ref(false)
-const auditLogs = ref<AuditLog[]>([])
-const currentPage = ref(1)
-const pageSize = ref(20)
-const total = ref(0)
-const auditActionFilter = ref('')
-const auditUserFilter = ref('')
+const loading = ref(false);
+const auditLogs = ref<AuditLog[]>([]);
+const currentPage = ref(1);
+const pageSize = ref(20);
+const total = ref(0);
+const auditActionFilter = ref('');
+const auditUserFilter = ref('');
 
 const actionOptions = computed(() => {
-    const labels = tm('admin.actions_labels')
-    return [
-        { label: t('common.all'), value: '' },
-        ...Object.entries(labels).map(([value, label]) => ({
-            label: label as string,
-            value
-        }))
-    ]
-})
+  const labels = tm('admin.actions_labels');
+  return [
+    { label: t('common.all'), value: '' },
+    ...Object.entries(labels).map(([value, label]) => ({
+      label: label as string,
+      value,
+    })),
+  ];
+});
 
 const loadAuditLogs = async () => {
-    loading.value = true
-    try {
-        const offset = (currentPage.value - 1) * pageSize.value
-        const result = await requestAuditLogs({
-            limit: pageSize.value,
-            offset: offset,
-            action: auditActionFilter.value || undefined,
-            user: auditUserFilter.value || undefined
-        })
-        auditLogs.value = result.logs
-        total.value = result.total
-    } catch (e) {
-        console.error('Failed to load audit logs:', e)
-    } finally {
-        loading.value = false
-    }
-}
+  loading.value = true;
+  try {
+    const offset = (currentPage.value - 1) * pageSize.value;
+    const result = await requestAuditLogs({
+      limit: pageSize.value,
+      offset: offset,
+      action: auditActionFilter.value || undefined,
+      user: auditUserFilter.value || undefined,
+    });
+    auditLogs.value = result.logs;
+    total.value = result.total;
+  } catch (e) {
+    console.error('Failed to load audit logs:', e);
+  } finally {
+    loading.value = false;
+  }
+};
 
 const handlePageChange = (page: number) => {
-    currentPage.value = page
-    loadAuditLogs()
-}
+  currentPage.value = page;
+  loadAuditLogs();
+};
 
 const handleSearch = () => {
-    currentPage.value = 1
-    loadAuditLogs()
-}
+  currentPage.value = 1;
+  loadAuditLogs();
+};
 
 const getActionLabel = (action: string) => {
-    return t(`admin.actions_labels.${action}`) || action
-}
+  return t(`admin.actions_labels.${action}`) || action;
+};
 
 const getActionType = (action: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' => {
-    const types: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
-        'upload': 'success',
-        'delete': 'danger',
-        'rename': 'warning',
-        'share': 'primary',
-        'grant_permission': 'success',
-        'revoke_permission': 'warning',
-        'login': 'info'
-    }
-    return types[action] || 'info'
-}
+  const types: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
+    upload: 'success',
+    delete: 'danger',
+    rename: 'warning',
+    share: 'primary',
+    grant_permission: 'success',
+    revoke_permission: 'warning',
+    login: 'info',
+  };
+  return types[action] || 'info';
+};
 
 const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString(locale.value === 'zh-CN' ? 'zh-CN' : 'en-US')
-}
+  return new Date(dateStr).toLocaleString(locale.value === 'zh-CN' ? 'zh-CN' : 'en-US');
+};
 
 defineExpose({
-    loadAuditLogs,
-    init: () => {
-        if (auditLogs.value.length === 0) {
-            loadAuditLogs()
-        }
+  loadAuditLogs,
+  init: () => {
+    if (auditLogs.value.length === 0) {
+      loadAuditLogs();
     }
-})
+  },
+});
 </script>
 
 <template>

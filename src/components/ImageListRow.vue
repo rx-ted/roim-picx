@@ -32,6 +32,9 @@
     <div class="flex-1 min-w-0">
       <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate mb-1" :title="name">
         {{ name }}
+        <el-tag v-if="isPrivate" size="small" type="warning" effect="dark" class="ml-2 align-middle">
+          <font-awesome-icon :icon="faLock" class="mr-1" />{{ $t('image.private') }}
+        </el-tag>
       </h4>
       <p v-if="originalName" class="text-xs text-gray-500 dark:text-gray-400 truncate mb-1" :title="originalName">
         {{ $t('manage.originalName') }}: {{ originalName }}
@@ -121,38 +124,61 @@
 </template>
 
 <script setup lang="ts">
-import { faTrashAlt, faLink, faImage, faEdit, faEye, faUser, faShareAlt, faFolderPlus, faTag, faEyeSlash, faCheck } from '@fortawesome/free-solid-svg-icons'
-import copy from 'copy-to-clipboard'
-import formatBytes from '../utils/format-bytes'
-import { ElTooltip, ElPopconfirm, ElImage, ElMessage } from 'element-plus'
-import { ref, computed } from 'vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {
+  faTrashAlt,
+  faLink,
+  faImage,
+  faEdit,
+  faEye,
+  faUser,
+  faShareAlt,
+  faFolderPlus,
+  faTag,
+  faEyeSlash,
+  faCheck,
+  faLock,
+} from '@fortawesome/free-solid-svg-icons';
+import copy from 'copy-to-clipboard';
+import formatBytes from '../utils/format-bytes';
+import { ElTooltip, ElPopconfirm, ElImage, ElMessage, ElTag } from 'element-plus';
+import { ref, computed } from 'vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const props = defineProps<{
-  src: string
-  name: string
-  size: number
-  uploadedAt?: number
-  originalName?: string
-  uploaderName?: string
-  tags?: string[]
-  nsfw?: boolean
-  selected?: boolean
-  isSelectMode?: boolean
-}>()
+  src: string;
+  name: string;
+  size: number;
+  uploadedAt?: number;
+  originalName?: string;
+  uploaderName?: string;
+  tags?: string[];
+  nsfw?: boolean;
+  isPrivate?: boolean;
+  selected?: boolean;
+  isSelectMode?: boolean;
+}>();
 
-const emit = defineEmits(['delete', 'detail', 'rename', 'preview', 'share', 'addToAlbum', 'editTags', 'toggleSelect'])
-const imageError = ref(false)
+const emit = defineEmits([
+  'delete',
+  'detail',
+  'rename',
+  'preview',
+  'share',
+  'addToAlbum',
+  'editTags',
+  'toggleSelect',
+]);
+const imageError = ref(false);
 
-const isNsfw = computed(() => props.nsfw)
-const showNsfw = ref(false)
+const isNsfw = computed(() => props.nsfw);
+const showNsfw = ref(false);
 
 const toggleNsfw = (e: Event) => {
-    e.stopPropagation()
-    showNsfw.value = !showNsfw.value
-}
+  e.stopPropagation();
+  showNsfw.value = !showNsfw.value;
+};
 
 const handleDelete = () => {
-  emit('delete')
-}
+  emit('delete');
+};
 </script>

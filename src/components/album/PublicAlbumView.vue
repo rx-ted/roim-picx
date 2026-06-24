@@ -1,79 +1,86 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { ElMessage, ElImage, ElEmpty, ElCard, ElImageViewer } from 'element-plus'
-import { faLock, faUnlock, faThLarge, faImage as faImageIcon, faExclamationCircle, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
-import { requestGetAlbumShareInfo, requestVerifyAlbumShare } from '../../utils/request'
-import type { AlbumShareInfo, AlbumImage } from '../../utils/types'
-import formatBytes from '../../utils/format-bytes'
-import BaseButton from '../common/BaseButton.vue'
-import BaseInput from '../common/BaseInput.vue'
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { ElMessage, ElImage, ElEmpty, ElCard, ElImageViewer } from 'element-plus';
+import {
+  faLock,
+  faUnlock,
+  faThLarge,
+  faImage as faImageIcon,
+  faExclamationCircle,
+  faExclamationTriangle,
+} from '@fortawesome/free-solid-svg-icons';
+import { requestGetAlbumShareInfo, requestVerifyAlbumShare } from '../../utils/request';
+import type { AlbumShareInfo, AlbumImage } from '../../utils/types';
+import formatBytes from '../../utils/format-bytes';
+import BaseButton from '../common/BaseButton.vue';
+import BaseInput from '../common/BaseInput.vue';
 
-const route = useRoute()
-const { t } = useI18n()
+const route = useRoute();
+const { t } = useI18n();
 
-const token = route.params.token as string
-const loading = ref(false)
-const shareInfo = ref<AlbumShareInfo | null>(null)
-const images = ref<AlbumImage[]>([])
-const verified = ref(false)
-const password = ref('')
-const passwordError = ref('')
+const token = route.params.token as string;
+const loading = ref(false);
+const shareInfo = ref<AlbumShareInfo | null>(null);
+const images = ref<AlbumImage[]>([]);
+const verified = ref(false);
+const password = ref('');
+const passwordError = ref('');
 
-const errorTitle = ref('')
-const errorMsg = ref('')
+const errorTitle = ref('');
+const errorMsg = ref('');
 
 // Preview
-const previewVisible = ref(false)
-const previewIndex = ref(0)
-const previewUrls = ref<string[]>([])
+const previewVisible = ref(false);
+const previewIndex = ref(0);
+const previewUrls = ref<string[]>([]);
 
 // View mode: 'grid' or 'large'
-const viewMode = ref<'grid' | 'large'>('grid')
+const viewMode = ref<'grid' | 'large'>('grid');
 
 const loadInfo = async () => {
-    loading.value = true
-    try {
-        const res = await requestGetAlbumShareInfo(token)
-        shareInfo.value = res
-        if (!res.hasPassword) {
-            verifyAndLoad()
-        }
-    } catch (e: any) {
-        errorTitle.value = t('share.invalidLinkTitle')
-        errorMsg.value = e || t('share.invalidLinkMessage')
-    } finally {
-        loading.value = false
+  loading.value = true;
+  try {
+    const res = await requestGetAlbumShareInfo(token);
+    shareInfo.value = res;
+    if (!res.hasPassword) {
+      verifyAndLoad();
     }
-}
+  } catch (e: any) {
+    errorTitle.value = t('share.invalidLinkTitle');
+    errorMsg.value = e || t('share.invalidLinkMessage');
+  } finally {
+    loading.value = false;
+  }
+};
 
 const verifyAndLoad = async () => {
-    loading.value = true
-    try {
-        const res = await requestVerifyAlbumShare(token, password.value)
-        images.value = res.images
-        previewUrls.value = res.images.map(i => i.image_url)
-        verified.value = true
-    } catch (e: any) {
-        passwordError.value = e
-    } finally {
-        loading.value = false
-    }
-}
+  loading.value = true;
+  try {
+    const res = await requestVerifyAlbumShare(token, password.value);
+    images.value = res.images;
+    previewUrls.value = res.images.map((i) => i.image_url);
+    verified.value = true;
+  } catch (e: any) {
+    passwordError.value = e;
+  } finally {
+    loading.value = false;
+  }
+};
 
 const showPreview = (index: number) => {
-    previewIndex.value = index
-    previewVisible.value = true
-}
+  previewIndex.value = index;
+  previewVisible.value = true;
+};
 
 const closePreview = () => {
-    previewVisible.value = false
-}
+  previewVisible.value = false;
+};
 
 onMounted(() => {
-    loadInfo()
-})
+  loadInfo();
+});
 </script>
 
 <template>

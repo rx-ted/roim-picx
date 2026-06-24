@@ -78,156 +78,158 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
-import { faShare, faSpinner, faRedo, faTimes } from '@fortawesome/free-solid-svg-icons'
-import formatBytes from '../utils/format-bytes'
-import copy from 'copy-to-clipboard'
-import { requestCreateShare, requestShareAlbum } from '../utils/request'
-import type { AlbumShareInfo } from '../utils/types'
-import BaseDialog from './common/BaseDialog.vue'
-import BaseButton from './common/BaseButton.vue'
-import BaseInput from './common/BaseInput.vue'
-import BaseSwitch from './common/BaseSwitch.vue'
-import BaseDatePicker from './common/BaseDatePicker.vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage } from 'element-plus';
+import { faShare, faSpinner, faRedo, faTimes } from '@fortawesome/free-solid-svg-icons';
+import formatBytes from '../utils/format-bytes';
+import copy from 'copy-to-clipboard';
+import { requestCreateShare, requestShareAlbum } from '../utils/request';
+import type { AlbumShareInfo } from '../utils/types';
+import BaseDialog from './common/BaseDialog.vue';
+import BaseButton from './common/BaseButton.vue';
+import BaseInput from './common/BaseInput.vue';
+import BaseSwitch from './common/BaseSwitch.vue';
+import BaseDatePicker from './common/BaseDatePicker.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 interface Props {
-    modelValue: boolean
-    type: 'image' | 'album'
-    // Image specific
-    imageKey?: string
-    imageUrl?: string
-    imageName?: string
-    imageSize?: number
-    // Album specific
-    albumId?: number
-    albumName?: string
-    coverImage?: string
-    shareInfo?: AlbumShareInfo
+  modelValue: boolean;
+  type: 'image' | 'album';
+  // Image specific
+  imageKey?: string;
+  imageUrl?: string;
+  imageName?: string;
+  imageSize?: number;
+  // Album specific
+  albumId?: number;
+  albumName?: string;
+  coverImage?: string;
+  shareInfo?: AlbumShareInfo;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    type: 'image'
-})
+  type: 'image',
+});
 
-const emit = defineEmits<{
-    (e: 'update:modelValue', value: boolean): void
-}>()
+const emit = defineEmits<(e: 'update:modelValue', value: boolean) => void>();
 
-const loading = ref(false)
-const shareUrl = ref('')
+const loading = ref(false);
+const shareUrl = ref('');
 
-const enablePassword = ref(false)
-const password = ref('')
-const enableExpiry = ref(false)
-const expireTime = ref<Date>()
-const enableMaxViews = ref(false)
-const maxViews = ref(10)
+const enablePassword = ref(false);
+const password = ref('');
+const enableExpiry = ref(false);
+const expireTime = ref<Date>();
+const enableMaxViews = ref(false);
+const maxViews = ref(10);
 
 // Computed helpers for preview
 const displayName = computed(() => {
-    return props.type === 'image' ? props.imageName : props.albumName
-})
+  return props.type === 'image' ? props.imageName : props.albumName;
+});
 
 const displayCover = computed(() => {
-    return props.type === 'image' ? props.imageUrl : props.coverImage // Album cover could be added if available, for now empty or default
-})
+  return props.type === 'image' ? props.imageUrl : props.coverImage; // Album cover could be added if available, for now empty or default
+});
 
 const displaySubtext = computed(() => {
-    if (props.type === 'image') {
-        return props.imageSize ? formatBytes(props.imageSize) : ''
-    }
-    return t('album.shareTitle')
-})
+  if (props.type === 'image') {
+    return props.imageSize ? formatBytes(props.imageSize) : '';
+  }
+  return t('album.shareTitle');
+});
 
-watch(() => props.modelValue, (val) => {
+watch(
+  () => props.modelValue,
+  (val) => {
     if (val) {
-        // Reset state or fill from existing
-        shareUrl.value = ''
-        console.log(props.shareInfo)
-        if (props.shareInfo) {
-            // Edit mode
-            const share = props.shareInfo
-            enablePassword.value = share.hasPassword
-            // Don't pre-fill password for security/logic reasons, user sets new one if they want to change it
-            // or we keep it empty. If logic requires sending undefined to keep old:
-            password.value = ''
+      // Reset state or fill from existing
+      shareUrl.value = '';
+      console.log(props.shareInfo);
+      if (props.shareInfo) {
+        // Edit mode
+        const share = props.shareInfo;
+        enablePassword.value = share.hasPassword;
+        // Don't pre-fill password for security/logic reasons, user sets new one if they want to change it
+        // or we keep it empty. If logic requires sending undefined to keep old:
+        password.value = '';
 
-            enableExpiry.value = !!share.expireAt
-            expireTime.value = share.expireAt ? new Date(share.expireAt) : undefined
+        enableExpiry.value = !!share.expireAt;
+        expireTime.value = share.expireAt ? new Date(share.expireAt) : undefined;
 
-            enableMaxViews.value = !!share.maxViews
-            maxViews.value = share.maxViews || 10
+        enableMaxViews.value = !!share.maxViews;
+        maxViews.value = share.maxViews || 10;
 
-            // If we want to show current share link immediately:
-            // shareUrl.value = share.url 
-            // User request implies "modify info", so maybe we start in edit mode not result mode.
-        } else {
-            // Create mode defaults
-            enablePassword.value = false
-            password.value = ''
-            enableExpiry.value = false
-            expireTime.value = undefined
-            enableMaxViews.value = false
-            maxViews.value = 10
-        }
+        // If we want to show current share link immediately:
+        // shareUrl.value = share.url
+        // User request implies "modify info", so maybe we start in edit mode not result mode.
+      } else {
+        // Create mode defaults
+        enablePassword.value = false;
+        password.value = '';
+        enableExpiry.value = false;
+        expireTime.value = undefined;
+        enableMaxViews.value = false;
+        maxViews.value = 10;
+      }
     }
-}, { immediate: true })
+  },
+  { immediate: true },
+);
 
 const disabledDate = (time: Date) => {
-    return time.getTime() < Date.now()
-}
+  return time.getTime() < Date.now();
+};
 
 const handleClose = () => {
-    emit('update:modelValue', false)
-}
+  emit('update:modelValue', false);
+};
 
 const handleAction = () => {
-    if (shareUrl.value) {
-        shareUrl.value = ''
-    } else {
-        createShare()
-    }
-}
+  if (shareUrl.value) {
+    shareUrl.value = '';
+  } else {
+    createShare();
+  }
+};
 
 const createShare = async () => {
-    loading.value = true
-    try {
-        let result
-        if (props.type === 'image') {
-            if (!props.imageKey || !props.imageUrl) throw new Error('Missing image details')
-            result = await requestCreateShare({
-                imageKey: props.imageKey,
-                imageUrl: props.imageUrl,
-                password: enablePassword.value ? password.value : undefined,
-                expireAt: enableExpiry.value && expireTime.value ? expireTime.value.getTime() : undefined,
-                maxViews: enableMaxViews.value ? maxViews.value : undefined
-            })
-        } else {
-            if (!props.albumId) throw new Error('Missing album id')
-            result = await requestShareAlbum(props.albumId, {
-                password: enablePassword.value ? password.value : undefined,
-                expireAt: enableExpiry.value && expireTime.value ? expireTime.value.getTime() : undefined,
-                maxViews: enableMaxViews.value ? maxViews.value : undefined
-            })
-        }
-
-        shareUrl.value = result.url
-        ElMessage.success(t('share.shareUrlGenerated'))
-    } catch (e: any) {
-        ElMessage.error(e.message || t('share.createShareFailed'))
-    } finally {
-        loading.value = false
+  loading.value = true;
+  try {
+    let result: any;
+    if (props.type === 'image') {
+      if (!props.imageKey || !props.imageUrl) throw new Error('Missing image details');
+      result = await requestCreateShare({
+        imageKey: props.imageKey,
+        imageUrl: props.imageUrl,
+        password: enablePassword.value ? password.value : undefined,
+        expireAt: enableExpiry.value && expireTime.value ? expireTime.value.getTime() : undefined,
+        maxViews: enableMaxViews.value ? maxViews.value : undefined,
+      });
+    } else {
+      if (!props.albumId) throw new Error('Missing album id');
+      result = await requestShareAlbum(props.albumId, {
+        password: enablePassword.value ? password.value : undefined,
+        expireAt: enableExpiry.value && expireTime.value ? expireTime.value.getTime() : undefined,
+        maxViews: enableMaxViews.value ? maxViews.value : undefined,
+      });
     }
-}
+
+    shareUrl.value = result.url;
+    ElMessage.success(t('share.shareUrlGenerated'));
+  } catch (e: any) {
+    ElMessage.error(e.message || t('share.createShareFailed'));
+  } finally {
+    loading.value = false;
+  }
+};
 
 const copyLink = () => {
-    if (copy(shareUrl.value)) {
-        ElMessage.success(t('share.linkCopied'))
-    }
-}
+  if (copy(shareUrl.value)) {
+    ElMessage.success(t('share.linkCopied'));
+  }
+};
 </script>

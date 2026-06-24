@@ -1,61 +1,64 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { ElDialog } from 'element-plus'
-import { useI18n } from 'vue-i18n'
-import BaseButton from './BaseButton.vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { ElDialog } from 'element-plus';
+import { useI18n } from 'vue-i18n';
+import BaseButton from './BaseButton.vue';
 
-const props = withDefaults(defineProps<{
-    modelValue: boolean
-    title?: string
-    width?: string
-    loading?: boolean
-    confirmText?: string
-    cancelText?: string
-    showFooter?: boolean
-    confirmDisabled?: boolean
-    confirmType?: 'primary' | 'secondary' | 'danger' | 'white' | 'indigo'
-}>(), {
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean;
+    title?: string;
+    width?: string;
+    loading?: boolean;
+    confirmText?: string;
+    cancelText?: string;
+    showFooter?: boolean;
+    confirmDisabled?: boolean;
+    confirmType?: 'primary' | 'secondary' | 'danger' | 'white' | 'indigo';
+  }>(),
+  {
     title: '',
     width: '480px',
     loading: false,
     showFooter: true,
     confirmDisabled: false,
-    confirmType: 'indigo'
-})
+    confirmType: 'indigo',
+  },
+);
 
-const emit = defineEmits(['update:modelValue', 'confirm', 'cancel', 'close'])
-const { t } = useI18n()
+const emit = defineEmits(['update:modelValue', 'confirm', 'cancel', 'close']);
+const { t } = useI18n();
 
 // Responsive dialog
-const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024)
-const isMobile = computed(() => windowWidth.value < 640)
-const dialogWidth = computed(() => isMobile.value ? '90%' : props.width)
+const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024);
+const isMobile = computed(() => windowWidth.value < 640);
+const dialogWidth = computed(() => (isMobile.value ? '90%' : props.width));
 
 const handleResize = () => {
-    windowWidth.value = window.innerWidth
-}
+  windowWidth.value = window.innerWidth;
+};
 
 onMounted(() => {
-    window.addEventListener('resize', handleResize)
-})
+  window.addEventListener('resize', handleResize);
+});
 
 onUnmounted(() => {
-    window.removeEventListener('resize', handleResize)
-})
+  window.removeEventListener('resize', handleResize);
+});
 
 const handleClose = () => {
-    emit('update:modelValue', false)
-    emit('close')
-}
+  emit('update:modelValue', false);
+  emit('close');
+};
 
 const handleConfirm = () => {
-    emit('confirm')
-}
+  emit('confirm');
+};
 
 const handleCancel = () => {
-    emit('update:modelValue', false)
-    emit('cancel')
-}
+  emit('update:modelValue', false);
+  emit('cancel');
+};
 </script>
 
 <template>

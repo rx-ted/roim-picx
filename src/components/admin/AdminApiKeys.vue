@@ -1,105 +1,113 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faPlus, faTrash, faKey, faCopy, faClock, faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons'
-import { requestApiKeys, requestCreateApiKey, requestRevokeApiKey } from '../../utils/request'
-import type { ApiKey } from '../../utils/types'
-import BaseButton from '../common/BaseButton.vue'
-import BaseDialog from '../common/BaseDialog.vue'
-import BaseInput from '../common/BaseInput.vue'
-import CustomSelect from '../common/CustomSelect.vue'
+import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import {
+  faPlus,
+  faTrash,
+  faKey,
+  faCopy,
+  faClock,
+  faCircleCheck,
+  faCircleXmark,
+} from '@fortawesome/free-solid-svg-icons';
+import { requestApiKeys, requestCreateApiKey, requestRevokeApiKey } from '../../utils/request';
+import type { ApiKey } from '../../utils/types';
+import BaseButton from '../common/BaseButton.vue';
+import BaseDialog from '../common/BaseDialog.vue';
+import BaseInput from '../common/BaseInput.vue';
+import CustomSelect from '../common/CustomSelect.vue';
 
-const { t } = useI18n()
+const { t } = useI18n();
 
-const loading = ref(false)
-const apiKeys = ref<ApiKey[]>([])
-const showCreateDialog = ref(false)
-const showSuccessDialog = ref(false)
-const newKeyName = ref('')
-const createdKey = ref<ApiKey | null>(null)
-const showRevokeDialog = ref(false)
-const keyToRevoke = ref<ApiKey | null>(null)
-const expiryOption = ref(0)
+const loading = ref(false);
+const apiKeys = ref<ApiKey[]>([]);
+const showCreateDialog = ref(false);
+const showSuccessDialog = ref(false);
+const newKeyName = ref('');
+const createdKey = ref<ApiKey | null>(null);
+const showRevokeDialog = ref(false);
+const keyToRevoke = ref<ApiKey | null>(null);
+const expiryOption = ref(0);
 const expiryOptions = [
   { label: t('admin.apiKeyExpirationNever'), value: 0 },
   { label: t('admin.apiKeyExpiration7Days'), value: 7 },
   { label: t('admin.apiKeyExpiration30Days'), value: 30 },
-  { label: t('admin.apiKeyExpiration90Days'), value: 90 }
-]
+  { label: t('admin.apiKeyExpiration90Days'), value: 90 },
+];
 
 const loadApiKeys = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    apiKeys.value = await requestApiKeys()
+    apiKeys.value = await requestApiKeys();
   } catch (e) {
-    console.error(e)
+    console.error(e);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handleCreate = async () => {
   if (!newKeyName.value) {
-    ElMessage.warning(t('admin.apiKeyNamePlaceholder'))
-    return
+    ElMessage.warning(t('admin.apiKeyNamePlaceholder'));
+    return;
   }
 
   try {
-    let expiresAt: string | undefined
+    let expiresAt: string | undefined;
     if (expiryOption.value > 0) {
-      const date = new Date()
-      date.setDate(date.getDate() + expiryOption.value)
-      expiresAt = date.toISOString()
+      const date = new Date();
+      date.setDate(date.getDate() + expiryOption.value);
+      expiresAt = date.toISOString();
     }
-    const result = await requestCreateApiKey({ name: newKeyName.value, expires_at: expiresAt })
-    createdKey.value = result
-    showCreateDialog.value = false
-    showSuccessDialog.value = true
-    newKeyName.value = ''
-    expiryOption.value = 0
-    loadApiKeys()
+    const result = await requestCreateApiKey({ name: newKeyName.value, expires_at: expiresAt });
+    createdKey.value = result;
+    showCreateDialog.value = false;
+    showSuccessDialog.value = true;
+    newKeyName.value = '';
+    expiryOption.value = 0;
+    loadApiKeys();
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
-}
+};
 
 const handleRevoke = (key: ApiKey) => {
-  keyToRevoke.value = key
-  showRevokeDialog.value = true
-}
+  keyToRevoke.value = key;
+  showRevokeDialog.value = true;
+};
 
 const confirmRevoke = async () => {
-  if (!keyToRevoke.value) return
-  
-  loading.value = true
+  if (!keyToRevoke.value) return;
+
+  loading.value = true;
   try {
-    await requestRevokeApiKey(keyToRevoke.value.id)
-    ElMessage.success(t('common.success'))
-    showRevokeDialog.value = false
-    loadApiKeys()
+    await requestRevokeApiKey(keyToRevoke.value.id);
+    ElMessage.success(t('common.success'));
+    showRevokeDialog.value = false;
+    loadApiKeys();
   } catch (e) {
-    console.error(e)
+    console.error(e);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text).then(() => {
-    ElMessage.success(t('common.copied'))
-  })
-}
+    ElMessage.success(t('common.copied'));
+  });
+};
 
 const formatDate = (date: string | null) => {
-  if (!date) return '-'
-  return new Date(date).toLocaleString()
-}
+  if (!date) return '-';
+  return new Date(date).toLocaleString();
+};
 
 onMounted(() => {
-  loadApiKeys()
-})
+  loadApiKeys();
+});
 </script>
 
 <template>

@@ -167,31 +167,41 @@
 </template>
 
 <script setup lang="ts">
-import { faTrashAlt, faLink, faTimes, faImage, faEdit, faEye, faUser, faShareAlt, faFolderPlus } from '@fortawesome/free-solid-svg-icons'
-import copy from 'copy-to-clipboard'
-import formatBytes from '../utils/format-bytes'
-import { ElTooltip, ElPopconfirm, ElImage, ElMessage } from 'element-plus'
-import { ref } from 'vue'
-import LoadingOverlay from '../components/LoadingOverlay.vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {
+  faTrashAlt,
+  faLink,
+  faTimes,
+  faImage,
+  faEdit,
+  faEye,
+  faUser,
+  faShareAlt,
+  faFolderPlus,
+} from '@fortawesome/free-solid-svg-icons';
+import copy from 'copy-to-clipboard';
+import formatBytes from '../utils/format-bytes';
+import { ElTooltip, ElPopconfirm, ElImage, ElMessage } from 'element-plus';
+import { ref } from 'vue';
+import LoadingOverlay from '../components/LoadingOverlay.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const props = defineProps<{
-    src: string
-    name: string
-    size: number
-    mode: 'converted' | 'uploaded'
-    uploadedAt?: number
-    expiresAt?: number
-    originalName?: string
-    uploaderName?: string
-}>()
-const emit = defineEmits(['delete', 'copy', 'rename', 'preview', 'share', 'addToAlbum'])
+  src: string;
+  name: string;
+  size: number;
+  mode: 'converted' | 'uploaded';
+  uploadedAt?: number;
+  expiresAt?: number;
+  originalName?: string;
+  uploaderName?: string;
+}>();
+const emit = defineEmits(['delete', 'copy', 'rename', 'preview', 'share', 'addToAlbum']);
 
-const imageError = ref(false)
-const loading = ref(true)
+const imageError = ref(false);
+const loading = ref(true);
 
 const handleDelete = () => {
-    loading.value = true
-    emit('delete')
-}
+  loading.value = true;
+  emit('delete');
+};
 </script>

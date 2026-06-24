@@ -127,6 +127,18 @@
                     :placeholder="$t('tags.inputPlaceholder')" :hint="$t('tags.inputHint')" />
             </div>
 
+            <!-- Private Image -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{
+                    $t('image.private') }}</label>
+                <BaseInput :model-value="privatePassword"
+                    @update:model-value="$emit('update:privatePassword', $event)" type="password"
+                    :placeholder="$t('upload.privatePasswordPlaceholder')" />
+                <p class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                    {{ $t('upload.privatePasswordHint') }}
+                </p>
+            </div>
+
             <!-- Storage Platform Selection -->
             <div v-if="storageProviders.length > 1">
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{
@@ -226,45 +238,55 @@
 </template>
 
 <script setup lang="ts">
-import { faFolder, faCompress, faCheck, faImages, faDatabase } from '@fortawesome/free-solid-svg-icons'
-import BaseAutocomplete from '../common/BaseAutocomplete.vue'
-import BaseDatePicker from '../common/BaseDatePicker.vue'
-import BaseSwitch from '../common/BaseSwitch.vue'
-import CustomSelect from '../common/CustomSelect.vue'
-import TagsInput from '../common/TagsInput.vue'
-import BaseInput from '../common/BaseInput.vue'
-import type { WatermarkConfig } from '../../utils/watermark'
-import type { StorageProvider } from '../../utils/request'
+import {
+  faFolder,
+  faCompress,
+  faCheck,
+  faImages,
+  faDatabase,
+} from '@fortawesome/free-solid-svg-icons';
+import BaseAutocomplete from '../common/BaseAutocomplete.vue';
+import BaseDatePicker from '../common/BaseDatePicker.vue';
+
+import CustomSelect from '../common/CustomSelect.vue';
+import TagsInput from '../common/TagsInput.vue';
+import BaseInput from '../common/BaseInput.vue';
+import type { WatermarkConfig } from '../../utils/watermark';
+import type { StorageProvider } from '../../utils/request';
+import BaseSwitch from '../common/BaseSwitch.vue';
 
 defineProps<{
-    customPath: string
-    directorySuggestions: string[]
-    keepName: boolean
-    enableExpiry: boolean
-    expireTime: Date | undefined
-    disabledDate: (time: Date) => boolean
-    compressionLevel: string
-    compressionOptions: any[]
-    currentAlbumId: string | number
-    albumOptions: any[]
-    uploadTags: string[]
-    storageProviders: StorageProvider[]
-    selectedStorageType: 'R2' | 'HF'
-    storageProviderOptions: any[]
-    watermarkConfig: WatermarkConfig
-    watermarkPositions: any[]
-}>()
+  customPath: string;
+  directorySuggestions: string[];
+  keepName: boolean;
+  enableExpiry: boolean;
+  expireTime: Date | undefined;
+  disabledDate: (time: Date) => boolean;
+  compressionLevel: string;
+  compressionOptions: any[];
+  currentAlbumId: string | number;
+  albumOptions: any[];
+  uploadTags: string[];
+  storageProviders: StorageProvider[];
+  selectedStorageType: 'R2' | 'HF';
+  storageProviderOptions: any[];
+  watermarkConfig: WatermarkConfig;
+  watermarkPositions: any[];
+  privatePassword: string;
+}>();
 
 defineEmits<{
-    (e: 'update:customPath', value: string): void
-    (e: 'update:keepName', value: boolean): void
-    (e: 'update:enableExpiry', value: boolean): void
-    (e: 'update:expireTime', value: Date | undefined): void
-    (e: 'update:compressionLevel', value: string): void
-    (e: 'update:currentAlbumId', value: string | number): void
-    (e: 'update:uploadTags', value: string[]): void
-    (e: 'update:selectedStorageType', value: 'R2' | 'HF'): void
-}>()
+  (e: 'update:customPath', value: string): void;
+  (e: 'update:keepName', value: boolean): void;
+  (e: 'update:enableExpiry', value: boolean): void;
+  (e: 'update:expireTime', value: Date | undefined): void;
+  (e: 'update:compressionLevel', value: string): void;
+  (e: 'update:currentAlbumId', value: string | number): void;
+  (e: 'update:uploadTags', value: string[]): void;
+  (e: 'update:selectedStorageType', value: 'R2' | 'HF'): void;
+  (e: 'update:isPrivate', value: boolean): void;
+  (e: 'update:privatePassword', value: string): void;
+}>();
 </script>
 
 <style scoped>

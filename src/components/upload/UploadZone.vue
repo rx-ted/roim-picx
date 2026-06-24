@@ -32,29 +32,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons'
-import ImageBox from '../ImageBox.vue'
-import type { ConvertedImage } from '../../utils/types'
+import { ref } from 'vue';
+import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons';
+import ImageBox from '../ImageBox.vue';
+import type { ConvertedImage } from '../../utils/types';
 
 defineProps<{
-    convertedImages: ConvertedImage[]
-}>()
+  convertedImages: ConvertedImage[];
+}>();
 
 const emit = defineEmits<{
-    (e: 'files-selected', files: FileList | null | undefined): void
-    (e: 'remove-image', tmpSrc: string): void
-}>()
+  (e: 'files-selected', files: FileList | null | undefined): void;
+  (e: 'remove-image', tmpSrc: string): void;
+}>();
 
-const isDragging = ref(false)
-const input = ref<HTMLInputElement>()
+const isDragging = ref(false);
+const input = ref<HTMLInputElement>();
 
 const onInputChange = () => {
-    emit('files-selected', input.value?.files)
-}
+  emit('files-selected', input.value?.files);
+};
 
 const onFileDrop = (e: DragEvent) => {
-    isDragging.value = false
-    emit('files-selected', e.dataTransfer?.files)
-}
+  isDragging.value = false;
+  emit('files-selected', e.dataTransfer?.files);
+};
 </script>

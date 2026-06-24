@@ -1,77 +1,80 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
-import { requestListAlbums, requestAddImagesToAlbum } from '../../utils/request'
-import type { Album } from '../../utils/types'
-import BaseDialog from '../common/BaseDialog.vue'
-import { faCheckCircle } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { ref, watch, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage } from 'element-plus';
+import { requestListAlbums, requestAddImagesToAlbum } from '../../utils/request';
+import type { Album } from '../../utils/types';
+import BaseDialog from '../common/BaseDialog.vue';
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const props = defineProps<{
-    modelValue: boolean
-    imageKeys: string[]
-    imageUrls: string[] // We need URLs for the backend API
-}>()
+  modelValue: boolean;
+  imageKeys: string[];
+  imageUrls: string[]; // We need URLs for the backend API
+}>();
 
-const emit = defineEmits(['update:modelValue', 'success'])
+const emit = defineEmits(['update:modelValue', 'success']);
 
-const { t } = useI18n()
-const loading = ref(false)
-const albums = ref<Album[]>([])
-const selectedAlbumId = ref<number | undefined>(undefined)
+const { t } = useI18n();
+const loading = ref(false);
+const albums = ref<Album[]>([]);
+const selectedAlbumId = ref<number | undefined>(undefined);
 
 const visible = computed({
-    get: () => props.modelValue,
-    set: (val) => emit('update:modelValue', val)
-})
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val),
+});
 
 const loadAlbums = async () => {
-    try {
-        const res = await requestListAlbums()
-        albums.value = res
-    } catch (e) {
-        // error
-    }
-}
+  try {
+    const res = await requestListAlbums();
+    albums.value = res;
+  } catch (e) {
+    // error
+  }
+};
 
 const handleConfirm = async () => {
-    if (!selectedAlbumId.value) return
-    if (props.imageKeys.length === 0) return
+  if (!selectedAlbumId.value) return;
+  if (props.imageKeys.length === 0) return;
 
-    loading.value = true
-    try {
-        // Construct array of { key, url }
-        // We assume keys and urls are parallel arrays or we pass objects
-        // The props definition imageKeys/imageUrls implies parallel.
-        const images = props.imageKeys.map((key, index) => ({
-            key,
-            url: props.imageUrls[index] || ''
-        }))
+  loading.value = true;
+  try {
+    // Construct array of { key, url }
+    // We assume keys and urls are parallel arrays or we pass objects
+    // The props definition imageKeys/imageUrls implies parallel.
+    const images = props.imageKeys.map((key, index) => ({
+      key,
+      url: props.imageUrls[index] || '',
+    }));
 
-        await requestAddImagesToAlbum(selectedAlbumId.value, images)
-        ElMessage.success(t('album.updateSuccess'))
-        emit('success')
-        visible.value = false
-    } catch (e) {
-        // error
-    } finally {
-        loading.value = false
-    }
-}
+    await requestAddImagesToAlbum(selectedAlbumId.value, images);
+    ElMessage.success(t('album.updateSuccess'));
+    emit('success');
+    visible.value = false;
+  } catch (e) {
+    // error
+  } finally {
+    loading.value = false;
+  }
+};
 
-watch(() => props.modelValue, (val) => {
+watch(
+  () => props.modelValue,
+  (val) => {
     if (val && albums.value.length === 0) {
-        loadAlbums()
+      loadAlbums();
     }
     if (val) {
-        selectedAlbumId.value = undefined
+      selectedAlbumId.value = undefined;
     }
-})
+  },
+);
 
 onMounted(() => {
-    // Preload potentially?
-})
+  // Preload potentially?
+});
 </script>
 
 <template>

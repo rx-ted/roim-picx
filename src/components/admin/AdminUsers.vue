@@ -1,137 +1,157 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox, ElTable, ElTableColumn, ElTag, ElAvatar, ElProgress, ElTooltip, ElPagination } from 'element-plus'
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
-    faUsers, faSync, faSearch, faUser, faUserShield, faHardDrive
-} from '@fortawesome/free-solid-svg-icons'
-import BaseInput from '../common/BaseInput.vue'
-import BaseSwitch from '../common/BaseSwitch.vue'
-import BaseButton from '../common/BaseButton.vue'
-import BaseDialog from '../common/BaseDialog.vue'
+  ElMessage,
+  ElMessageBox,
+  ElTable,
+  ElTableColumn,
+  ElTag,
+  ElAvatar,
+  ElProgress,
+  ElTooltip,
+  ElPagination,
+} from 'element-plus';
 import {
-    requestAdminUsers, requestSetUserViewAll, requestSetUserRole, requestSetUserQuota
-} from '../../utils/request'
-import type { AdminUser } from '../../utils/types'
-import formatBytes from '../../utils/format-bytes'
+  faUsers,
+  faSync,
+  faSearch,
+  faUser,
+  faUserShield,
+  faHardDrive,
+} from '@fortawesome/free-solid-svg-icons';
+import BaseInput from '../common/BaseInput.vue';
+import BaseSwitch from '../common/BaseSwitch.vue';
+import BaseButton from '../common/BaseButton.vue';
+import BaseDialog from '../common/BaseDialog.vue';
+import {
+  requestAdminUsers,
+  requestSetUserViewAll,
+  requestSetUserRole,
+  requestSetUserQuota,
+} from '../../utils/request';
+import type { AdminUser } from '../../utils/types';
+import formatBytes from '../../utils/format-bytes';
 
-const { t, locale } = useI18n()
+const { t, locale } = useI18n();
 
-const loading = ref(false)
-const users = ref<AdminUser[]>([])
-const userSearch = ref('')
-const currentPage = ref(1)
-const pageSize = ref(10)
-const total = ref(0) // 总用户数
+const loading = ref(false);
+const users = ref<AdminUser[]>([]);
+const userSearch = ref('');
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0); // 总用户数
 
 const loadUsers = async () => {
-    loading.value = true
-    try {
-        const res = await requestAdminUsers({
-            page: currentPage.value,
-            limit: pageSize.value,
-            keyword: userSearch.value || undefined
-        })
-        users.value = res.list
-        total.value = res.total
-    } catch (e) {
-        console.error('Failed to load users:', e)
-    } finally {
-        loading.value = false
-    }
-}
+  loading.value = true;
+  try {
+    const res = await requestAdminUsers({
+      page: currentPage.value,
+      limit: pageSize.value,
+      keyword: userSearch.value || undefined,
+    });
+    users.value = res.list;
+    total.value = res.total;
+  } catch (e) {
+    console.error('Failed to load users:', e);
+  } finally {
+    loading.value = false;
+  }
+};
 
 // 配额设置对话框
-const quotaDialogVisible = ref(false)
-const quotaEditUser = ref<AdminUser | null>(null)
-const quotaValue = ref(0)
+const quotaDialogVisible = ref(false);
+const quotaEditUser = ref<AdminUser | null>(null);
+const quotaValue = ref(0);
 
 const handlePageChange = (page: number) => {
-    currentPage.value = page
-    loadUsers()
-}
+  currentPage.value = page;
+  loadUsers();
+};
 
 const handleSizeChange = (size: number) => {
-    pageSize.value = size
-    currentPage.value = 1
-    loadUsers()
-}
+  pageSize.value = size;
+  currentPage.value = 1;
+  loadUsers();
+};
 
 const handleSearch = () => {
-    currentPage.value = 1
-    loadUsers()
-}
+  currentPage.value = 1;
+  loadUsers();
+};
 
 const toggleViewAll = async (user: AdminUser) => {
-    try {
-        // v-model has already updated user.canViewAll
-        await requestSetUserViewAll(user.login, user.canViewAll)
-        ElMessage.success(t(user.canViewAll ? 'admin.grantSuccess' : 'admin.revokeSuccess', { user: user.login }))
-    } catch (e) {
-        // Revert on failure
-        user.canViewAll = !user.canViewAll
-        console.error('Failed to toggle view all:', e)
-    }
-}
+  try {
+    // v-model has already updated user.canViewAll
+    await requestSetUserViewAll(user.login, user.canViewAll);
+    ElMessage.success(
+      t(user.canViewAll ? 'admin.grantSuccess' : 'admin.revokeSuccess', { user: user.login }),
+    );
+  } catch (e) {
+    // Revert on failure
+    user.canViewAll = !user.canViewAll;
+    console.error('Failed to toggle view all:', e);
+  }
+};
 
 const toggleRole = async (user: AdminUser) => {
-    const newRole = user.role === 'admin' ? 'user' : 'admin'
-    try {
-        await ElMessageBox.confirm(
-            t(newRole === 'admin' ? 'admin.confirmPromote' : 'admin.confirmDemote', { user: user.login }),
-            t('admin.confirmTitle'),
-            { type: 'warning' }
-        )
-        await requestSetUserRole(user.login, newRole)
-        user.role = newRole
-        if (newRole === 'admin') {
-            user.canViewAll = true
-        }
-        ElMessage.success(t('admin.quotaSuccess'))
-    } catch (e) {
-        if (e !== 'cancel') {
-            console.error('Failed to toggle role:', e)
-        }
+  const newRole = user.role === 'admin' ? 'user' : 'admin';
+  try {
+    await ElMessageBox.confirm(
+      t(newRole === 'admin' ? 'admin.confirmPromote' : 'admin.confirmDemote', { user: user.login }),
+      t('admin.confirmTitle'),
+      { type: 'warning' },
+    );
+    await requestSetUserRole(user.login, newRole);
+    user.role = newRole;
+    if (newRole === 'admin') {
+      user.canViewAll = true;
     }
-}
+    ElMessage.success(t('admin.quotaSuccess'));
+  } catch (e) {
+    if (e !== 'cancel') {
+      console.error('Failed to toggle role:', e);
+    }
+  }
+};
 
 const openQuotaDialog = (user: AdminUser) => {
-    quotaEditUser.value = user
-    quotaValue.value = Math.round(user.storageQuota / 1024 / 1024) // 转换为 MB
-    quotaDialogVisible.value = true
-}
+  quotaEditUser.value = user;
+  quotaValue.value = Math.round(user.storageQuota / 1024 / 1024); // 转换为 MB
+  quotaDialogVisible.value = true;
+};
 
 const saveQuota = async () => {
-    if (!quotaEditUser.value) return
-    try {
-        const quotaBytes = quotaValue.value * 1024 * 1024 // 转换为字节
-        await requestSetUserQuota(quotaEditUser.value.login, quotaBytes)
-        quotaEditUser.value.storageQuota = quotaBytes
-        quotaDialogVisible.value = false
-        ElMessage.success(t('admin.quotaSuccess'))
-    } catch (e) {
-        console.error('Failed to set quota:', e)
-    }
-}
+  if (!quotaEditUser.value) return;
+  try {
+    const quotaBytes = quotaValue.value * 1024 * 1024; // 转换为字节
+    await requestSetUserQuota(quotaEditUser.value.login, quotaBytes);
+    quotaEditUser.value.storageQuota = quotaBytes;
+    quotaDialogVisible.value = false;
+    ElMessage.success(t('admin.quotaSuccess'));
+  } catch (e) {
+    console.error('Failed to set quota:', e);
+  }
+};
 
 const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString(locale.value === 'zh-CN' ? 'zh-CN' : 'en-US')
-}
+  return new Date(dateStr).toLocaleString(locale.value === 'zh-CN' ? 'zh-CN' : 'en-US');
+};
 
 const getStoragePercent = (user: AdminUser) => {
-    if (!user.storageQuota || user.storageQuota === 0) return 0
-    return Math.round((user.storageUsed / user.storageQuota) * 100)
-}
+  if (!user.storageQuota || user.storageQuota === 0) return 0;
+  return Math.round((user.storageUsed / user.storageQuota) * 100);
+};
 
 // Expose methods for parent to call
 defineExpose({
-    loadUsers,
-    init: () => {
-        if (users.value.length === 0) {
-            loadUsers()
-        }
+  loadUsers,
+  init: () => {
+    if (users.value.length === 0) {
+      loadUsers();
     }
-})
+  },
+});
 </script>
 
 <template>

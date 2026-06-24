@@ -1,50 +1,50 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElCard, ElEmpty, ElTable, ElTableColumn, ElTooltip } from 'element-plus'
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElCard, ElEmpty, ElTable, ElTableColumn, ElTooltip } from 'element-plus';
+import { faGlobe, faLink, faEye } from '@fortawesome/free-solid-svg-icons';
+import BaseButton from '../common/BaseButton.vue';
 import {
-    faGlobe, faLink, faEye
-} from '@fortawesome/free-solid-svg-icons'
-import BaseButton from '../common/BaseButton.vue'
-import {
-    requestAnalyticsOverview, requestAnalyticsTrend, requestTopImages
-} from '../../utils/request'
-import type { AnalyticsOverview, DailyTrend, TopImage } from '../../utils/types'
-import formatBytes from '../../utils/format-bytes'
+  requestAnalyticsOverview,
+  requestAnalyticsTrend,
+  requestTopImages,
+} from '../../utils/request';
+import type { AnalyticsOverview, DailyTrend, TopImage } from '../../utils/types';
+import formatBytes from '../../utils/format-bytes';
 
-const { t } = useI18n()
+const { t } = useI18n();
 
-const loading = ref(false)
-const analyticsOverview = ref<AnalyticsOverview | null>(null)
-const analyticsTrend = ref<DailyTrend[]>([])
-const topImages = ref<TopImage[]>([])
+const loading = ref(false);
+const analyticsOverview = ref<AnalyticsOverview | null>(null);
+const analyticsTrend = ref<DailyTrend[]>([]);
+const topImages = ref<TopImage[]>([]);
 
 const loadAnalytics = async () => {
-    loading.value = true
-    try {
-        const [overview, trend, top] = await Promise.all([
-            requestAnalyticsOverview(),
-            requestAnalyticsTrend(),
-            requestTopImages(10, 30)
-        ])
-        analyticsOverview.value = overview
-        analyticsTrend.value = trend
-        topImages.value = top
-    } catch (e) {
-        console.error('Failed to load analytics:', e)
-    } finally {
-        loading.value = false
-    }
-}
+  loading.value = true;
+  try {
+    const [overview, trend, top] = await Promise.all([
+      requestAnalyticsOverview(),
+      requestAnalyticsTrend(),
+      requestTopImages(10, 30),
+    ]);
+    analyticsOverview.value = overview;
+    analyticsTrend.value = trend;
+    topImages.value = top;
+  } catch (e) {
+    console.error('Failed to load analytics:', e);
+  } finally {
+    loading.value = false;
+  }
+};
 
 defineExpose({
-    loadAnalytics,
-    init: () => {
-        if (!analyticsOverview.value) {
-            loadAnalytics()
-        }
+  loadAnalytics,
+  init: () => {
+    if (!analyticsOverview.value) {
+      loadAnalytics();
     }
-})
+  },
+});
 </script>
 
 <template>

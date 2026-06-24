@@ -1,226 +1,253 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
+import { ref, onMounted, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
-    ElButton, ElEmpty, ElPagination, ElMessageBox, ElMessage, ElDropdown, ElDropdownMenu, ElDropdownItem, ElDialog, ElImage
-} from 'element-plus'
+  ElButton,
+  ElEmpty,
+  ElPagination,
+  ElMessageBox,
+  ElMessage,
+  ElDropdown,
+  ElDropdownMenu,
+  ElDropdownItem,
+  ElDialog,
+  ElImage,
+  ElTag,
+} from 'element-plus';
 import {
-    faArrowLeft, faPlus, faShareAlt, faCog, faTrash, faPen, faCheckSquare, faTimes, faSpinner, faThLarge, faTh, faEye
-} from '@fortawesome/free-solid-svg-icons'
+  faArrowLeft,
+  faPlus,
+  faShareAlt,
+  faCog,
+  faTrash,
+  faPen,
+  faCheckSquare,
+  faTimes,
+  faSpinner,
+  faThLarge,
+  faTh,
+  faEye,
+  faLock,
+} from '@fortawesome/free-solid-svg-icons';
 import {
-    requestGetAlbum, requestDeleteAlbum, requestUpdateAlbum, requestRemoveImagesFromAlbum, requestSetAlbumCover
-} from '../../utils/request'
-import type { Album, AlbumImage } from '../../utils/types'
-import { useIntersectionObserver } from '@vueuse/core'
-import { ElImageViewer } from 'element-plus'
-import BaseInput from '../common/BaseInput.vue'
-import BaseButton from '../common/BaseButton.vue'
-import BaseDialog from '../common/BaseDialog.vue'
-import LoadingOverlay from '../LoadingOverlay.vue'
-import ShareDialog from '../ShareDialog.vue'
-import AddImagesDialog from './AddImagesToAlbumDialog.vue'
+  requestGetAlbum,
+  requestDeleteAlbum,
+  requestUpdateAlbum,
+  requestRemoveImagesFromAlbum,
+  requestSetAlbumCover,
+} from '../../utils/request';
+import type { Album, AlbumImage } from '../../utils/types';
+import { useIntersectionObserver } from '@vueuse/core';
+import { ElImageViewer } from 'element-plus';
+import BaseInput from '../common/BaseInput.vue';
+import BaseButton from '../common/BaseButton.vue';
+import BaseDialog from '../common/BaseDialog.vue';
+import LoadingOverlay from '../LoadingOverlay.vue';
+import ShareDialog from '../ShareDialog.vue';
+import AddImagesDialog from './AddImagesToAlbumDialog.vue';
 
-const router = useRouter()
-const route = useRoute()
-const { t } = useI18n()
+const router = useRouter();
+const route = useRoute();
+const { t } = useI18n();
 
-const loading = ref(false)
-const albumId = Number(route.params.id)
-const album = ref<Album | null>(null)
-const images = ref<AlbumImage[]>([])
-const total = ref(0)
-const currentPage = ref(1)
-const pageSize = ref(20)
+const loading = ref(false);
+const albumId = Number(route.params.id);
+const album = ref<Album | null>(null);
+const images = ref<AlbumImage[]>([]);
+const total = ref(0);
+const currentPage = ref(1);
+const pageSize = ref(20);
 
 // Selection mode
-const isSelectionMode = ref(false)
-const selectedKeys = ref<Set<string>>(new Set())
+const isSelectionMode = ref(false);
+const selectedKeys = ref<Set<string>>(new Set());
 
-const shareDialogVisible = ref(false)
-const addImagesDialogVisible = ref(false)
-const editDialogVisible = ref(false)
-const deleteDialogVisible = ref(false)
-const editForm = ref({ name: '', description: '' })
+const shareDialogVisible = ref(false);
+const addImagesDialogVisible = ref(false);
+const editDialogVisible = ref(false);
+const deleteDialogVisible = ref(false);
+const editForm = ref({ name: '', description: '' });
 
 // Big Image Mode
-const isBigMode = ref(false)
+const isBigMode = ref(false);
 
 // Image Preview
-const previewVisible = ref(false)
-const previewIndex = ref(0)
-const previewList = computed(() => images.value.map(img => img.image_url))
+const previewVisible = ref(false);
+const previewIndex = ref(0);
+const previewList = computed(() => images.value.map((img) => img.image_url));
 
 const handlePreview = (index: number) => {
-    previewIndex.value = index
-    previewVisible.value = true
-}
+  previewIndex.value = index;
+  previewVisible.value = true;
+};
 
-const hasMore = computed(() => images.value.length < total.value)
-const loadMoreTrigger = ref<HTMLElement | null>(null)
+const hasMore = computed(() => images.value.length < total.value);
+const loadMoreTrigger = ref<HTMLElement | null>(null);
 
 const loadAlbum = async (isLoadMore = false) => {
-    if (loading.value) return
-    if (isLoadMore && !hasMore.value) return
+  if (loading.value) return;
+  if (isLoadMore && !hasMore.value) return;
 
-    if (!isLoadMore) {
-        currentPage.value = 1
-        images.value = []
-    }
+  if (!isLoadMore) {
+    currentPage.value = 1;
+    images.value = [];
+  }
 
-    loading.value = true
-    try {
-        const res = await requestGetAlbum(albumId, {
-            page: currentPage.value,
-            limit: pageSize.value
-        })
-        album.value = res.album
-        if (isLoadMore) {
-            images.value = [...images.value, ...res.images]
-        } else {
-            images.value = res.images
-        }
-        total.value = res.total
-    } catch (e) {
-        ElMessage.error(t('common.error'))
-        if (!isLoadMore) router.push('/albums')
-    } finally {
-        loading.value = false
+  loading.value = true;
+  try {
+    const res = await requestGetAlbum(albumId, {
+      page: currentPage.value,
+      limit: pageSize.value,
+    });
+    album.value = res.album;
+    if (isLoadMore) {
+      images.value = [...images.value, ...res.images];
+    } else {
+      images.value = res.images;
     }
-}
+    total.value = res.total;
+  } catch (e) {
+    ElMessage.error(t('common.error'));
+    if (!isLoadMore) router.push('/albums');
+  } finally {
+    loading.value = false;
+  }
+};
 
-useIntersectionObserver(
-    loadMoreTrigger,
-    ([{ isIntersecting }]) => {
-        if (isIntersecting && hasMore.value && !loading.value) {
-            currentPage.value++
-            loadAlbum(true)
-        }
-    }
-)
+useIntersectionObserver(loadMoreTrigger, ([{ isIntersecting }]) => {
+  if (isIntersecting && hasMore.value && !loading.value) {
+    currentPage.value++;
+    loadAlbum(true);
+  }
+});
 
 const handleRefresh = () => {
-    loadAlbum(false)
-}
+  loadAlbum(false);
+};
 
 const goBack = () => {
-    router.push('/albums')
-}
+  router.push('/albums');
+};
 
 // Edit Album Logic
 // ... (Can reuse dialog from AlbumList or simple prompt)
 const handleEdit = () => {
-    if (!album.value) return
-    editForm.value = {
-        name: album.value.name,
-        description: album.value.description || ''
-    }
-    editDialogVisible.value = true
-}
+  if (!album.value) return;
+  editForm.value = {
+    name: album.value.name,
+    description: album.value.description || '',
+  };
+  editDialogVisible.value = true;
+};
 
 const handleSaveEdit = async () => {
-    if (!editForm.value.name) {
-        ElMessage.warning(t('album.nameRequired'))
-        return
-    }
+  if (!editForm.value.name) {
+    ElMessage.warning(t('album.nameRequired'));
+    return;
+  }
 
-    loading.value = true
-    try {
-        await requestUpdateAlbum(albumId, {
-            name: editForm.value.name,
-            description: editForm.value.description || undefined
-        })
-        if (album.value) {
-            album.value.name = editForm.value.name
-            album.value.description = editForm.value.description
-        }
-        ElMessage.success(t('album.updateSuccess'))
-        editDialogVisible.value = false
-    } catch (e) {
-        // error handled
-    } finally {
-        loading.value = false
+  loading.value = true;
+  try {
+    await requestUpdateAlbum(albumId, {
+      name: editForm.value.name,
+      description: editForm.value.description || undefined,
+    });
+    if (album.value) {
+      album.value.name = editForm.value.name;
+      album.value.description = editForm.value.description;
     }
-}
+    ElMessage.success(t('album.updateSuccess'));
+    editDialogVisible.value = false;
+  } catch (e) {
+    // error handled
+  } finally {
+    loading.value = false;
+  }
+};
 
 const handleDeleteAlbum = () => {
-    deleteDialogVisible.value = true
-}
+  deleteDialogVisible.value = true;
+};
 
 const confirmDeleteAlbum = async () => {
-    loading.value = true
-    try {
-        await requestDeleteAlbum(albumId)
-        ElMessage.success(t('album.deleteSuccess'))
-        deleteDialogVisible.value = false
-        router.push('/albums')
-    } catch (e) {
-        // error handled
-    } finally {
-        loading.value = false
-    }
-}
+  loading.value = true;
+  try {
+    await requestDeleteAlbum(albumId);
+    ElMessage.success(t('album.deleteSuccess'));
+    deleteDialogVisible.value = false;
+    router.push('/albums');
+  } catch (e) {
+    // error handled
+  } finally {
+    loading.value = false;
+  }
+};
 
 const handleOpenAddImages = () => {
-    addImagesDialogVisible.value = true
-}
+  addImagesDialogVisible.value = true;
+};
 
 const handleOpenShare = () => {
-    shareDialogVisible.value = true
-}
+  shareDialogVisible.value = true;
+};
 
 // Selection Logic
 const toggleSelectionMode = () => {
-    isSelectionMode.value = !isSelectionMode.value
-    selectedKeys.value.clear()
-}
+  isSelectionMode.value = !isSelectionMode.value;
+  selectedKeys.value.clear();
+};
 
 const toggleSelect = (key: string) => {
-    if (selectedKeys.value.has(key)) {
-        selectedKeys.value.delete(key)
-    } else {
-        selectedKeys.value.add(key)
-    }
-}
+  if (selectedKeys.value.has(key)) {
+    selectedKeys.value.delete(key);
+  } else {
+    selectedKeys.value.add(key);
+  }
+};
 
 const handleRemoveSelected = async () => {
-    if (selectedKeys.value.size === 0) return
-    try {
-        await ElMessageBox.confirm(t('common.confirm'), t('album.removeImages'), { type: 'warning' })
-        await requestRemoveImagesFromAlbum(albumId, Array.from(selectedKeys.value))
-        ElMessage.success(t('common.success'))
-        selectedKeys.value.clear()
-        isSelectionMode.value = false
-        handleRefresh()
-    } catch (e) { /* error or cancel */ }
-}
+  if (selectedKeys.value.size === 0) return;
+  try {
+    await ElMessageBox.confirm(t('common.confirm'), t('album.removeImages'), { type: 'warning' });
+    await requestRemoveImagesFromAlbum(albumId, Array.from(selectedKeys.value));
+    ElMessage.success(t('common.success'));
+    selectedKeys.value.clear();
+    isSelectionMode.value = false;
+    handleRefresh();
+  } catch (e) {
+    /* error or cancel */
+  }
+};
 
 const handleSetCover = async () => {
-    if (selectedKeys.value.size !== 1) {
-        ElMessage.warning('Please select exactly one image')
-        return
-    }
-    const key = Array.from(selectedKeys.value)[0]
-    const img = images.value.find(i => i.image_key === key)
-    if (!img) return
+  if (selectedKeys.value.size !== 1) {
+    ElMessage.warning('Please select exactly one image');
+    return;
+  }
+  const key = Array.from(selectedKeys.value)[0];
+  const img = images.value.find((i) => i.image_key === key);
+  if (!img) return;
 
-    try {
-        await requestSetAlbumCover(albumId, img.image_url)
-        ElMessage.success(t('album.updateSuccess'))
-        if (album.value) album.value.cover_image = img.image_url
-        isSelectionMode.value = false
-        selectedKeys.value.clear()
-    } catch (e) { /* error */ }
-}
+  try {
+    await requestSetAlbumCover(albumId, img.image_url);
+    ElMessage.success(t('album.updateSuccess'));
+    if (album.value) album.value.cover_image = img.image_url;
+    isSelectionMode.value = false;
+    selectedKeys.value.clear();
+  } catch (e) {
+    /* error */
+  }
+};
 
 // Image mode toggle
 const toggleMode = () => {
-    isBigMode.value = !isBigMode.value
-}
+  isBigMode.value = !isBigMode.value;
+};
 
 onMounted(() => {
-    loadAlbum()
-})
+  loadAlbum();
+});
 </script>
 
 <template>
@@ -312,6 +339,11 @@ onMounted(() => {
                         <el-image :src="img.image_url" fit="cover"
                             class="w-full h-full transition-transform duration-500 group-hover:scale-105"
                             loading="lazy" />
+                        <div v-if="img.isPrivate" class="absolute top-2 left-2 z-10">
+                            <el-tag size="small" effect="dark" type="warning">
+                                <font-awesome-icon :icon="faLock" class="mr-1" />{{ $t('image.private') }}
+                            </el-tag>
+                        </div>
                         <div v-if="!isSelectionMode"
                             class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <font-awesome-icon :icon="faEye" class="text-white text-2xl" />

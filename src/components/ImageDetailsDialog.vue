@@ -68,47 +68,47 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { faCopy, faImage } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import copy from 'copy-to-clipboard'
-import { ElMessage, ElImage } from 'element-plus'
-import BaseDialog from './common/BaseDialog.vue'
-import formatBytes from '../utils/format-bytes'
-import type { ImgItem } from '../utils/types'
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { faCopy, faImage } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import copy from 'copy-to-clipboard';
+import { ElMessage, ElImage } from 'element-plus';
+import BaseDialog from './common/BaseDialog.vue';
+import formatBytes from '../utils/format-bytes';
+import type { ImgItem } from '../utils/types';
 
 const props = defineProps<{
-  modelValue: boolean
-  item: ImgItem
-}>()
+  modelValue: boolean;
+  item: ImgItem;
+}>();
 
-const emit = defineEmits(['update:modelValue'])
-const { t } = useI18n()
+const emit = defineEmits(['update:modelValue']);
+const { t } = useI18n();
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
-})
+  set: (val) => emit('update:modelValue', val),
+});
 
 const displayName = computed(() => {
-    if (!props.item.key) return ''
-    const parts = props.item.key.split('/')
-    return parts[parts.length - 1]
-})
+  if (!props.item.key) return '';
+  const parts = props.item.key.split('/');
+  return parts[parts.length - 1];
+});
 
 const formats = computed(() => ({
-  'URL': { value: props.item.url },
-  'Markdown': { value: `![${displayName.value}](${props.item.url})` },
-  'HTML': { value: `<img src="${props.item.url}" alt="${displayName.value}" />` },
-  'BBCode': { value: `[img]${props.item.url}[/img]` }
-}))
+  URL: { value: props.item.url },
+  Markdown: { value: `![${displayName.value}](${props.item.url})` },
+  HTML: { value: `<img src="${props.item.url}" alt="${displayName.value}" />` },
+  BBCode: { value: `[img]${props.item.url}[/img]` },
+}));
 
 const copyText = (text: string) => {
   if (copy(text)) {
-    ElMessage.success(t('manage.copySuccess'))
+    ElMessage.success(t('manage.copySuccess'));
   } else {
-    ElMessage.error(t('manage.copyFailed'))
+    ElMessage.error(t('manage.copyFailed'));
   }
-}
+};
 </script>

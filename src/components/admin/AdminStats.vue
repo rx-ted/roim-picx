@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElCard } from 'element-plus'
-import {
-    faUsers, faHardDrive, faImage, faCalendarAlt
-} from '@fortawesome/free-solid-svg-icons'
-import type { SystemStats } from '../../utils/types'
-import formatBytes from '../../utils/format-bytes'
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElCard } from 'element-plus';
+import { faUsers, faHardDrive, faImage, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import type { SystemStats } from '../../utils/types';
+import formatBytes from '../../utils/format-bytes';
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 const props = defineProps<{
-    stats: SystemStats | null
-}>()
+  stats: SystemStats | null;
+}>();
 </script>
 
 <template>

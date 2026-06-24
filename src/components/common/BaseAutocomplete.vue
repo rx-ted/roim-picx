@@ -1,118 +1,120 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { faChevronDown, faTimes, faFolder } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import BaseInput from './BaseInput.vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { faChevronDown, faTimes, faFolder } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import BaseInput from './BaseInput.vue';
 
 interface Props {
-    modelValue: string
-    suggestions: string[]
-    placeholder?: string
-    label?: string
-    error?: string
-    disabled?: boolean
-    clearable?: boolean
+  modelValue: string;
+  suggestions: string[];
+  placeholder?: string;
+  label?: string;
+  error?: string;
+  disabled?: boolean;
+  clearable?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    clearable: false
-})
-const emit = defineEmits(['update:modelValue', 'select', 'change', 'clear'])
+  clearable: false,
+});
+const emit = defineEmits(['update:modelValue', 'select', 'change', 'clear']);
 
-const isOpen = ref(false)
-const containerRef = ref<HTMLElement | null>(null)
-const highlightedIndex = ref(-1)
+const isOpen = ref(false);
+const containerRef = ref<HTMLElement | null>(null);
+const highlightedIndex = ref(-1);
 
 const filteredSuggestions = computed(() => {
-    if (!props.modelValue) return props.suggestions
-    const query = props.modelValue.toLowerCase()
-    return props.suggestions.filter(s => s.toLowerCase().includes(query))
-})
+  if (!props.modelValue) return props.suggestions;
+  const query = props.modelValue.toLowerCase();
+  return props.suggestions.filter((s) => s.toLowerCase().includes(query));
+});
 
 const showSuggestions = computed(() => {
-    return isOpen.value && (filteredSuggestions.value.length > 0 || props.suggestions.length > 0)
-})
+  return isOpen.value && (filteredSuggestions.value.length > 0 || props.suggestions.length > 0);
+});
 
 const handleInput = (val: string | number | null | undefined) => {
-    const stringVal = val?.toString() || ''
-    emit('update:modelValue', stringVal)
-    emit('change', stringVal)
-    isOpen.value = true
-    highlightedIndex.value = -1
-}
+  const stringVal = val?.toString() || '';
+  emit('update:modelValue', stringVal);
+  emit('change', stringVal);
+  isOpen.value = true;
+  highlightedIndex.value = -1;
+};
 
 const handleClear = () => {
-    emit('update:modelValue', '')
-    emit('change', '')
-    emit('clear')
-    isOpen.value = false
-    highlightedIndex.value = -1
-}
+  emit('update:modelValue', '');
+  emit('change', '');
+  emit('clear');
+  isOpen.value = false;
+  highlightedIndex.value = -1;
+};
 
 const selectSuggestion = (suggestion: string) => {
-    emit('update:modelValue', suggestion)
-    emit('select', suggestion)
-    emit('change', suggestion)
-    isOpen.value = false
-    highlightedIndex.value = -1
-}
+  emit('update:modelValue', suggestion);
+  emit('select', suggestion);
+  emit('change', suggestion);
+  isOpen.value = false;
+  highlightedIndex.value = -1;
+};
 
 const toggleDropdown = () => {
-    if (props.disabled) return
-    isOpen.value = !isOpen.value
-}
+  if (props.disabled) return;
+  isOpen.value = !isOpen.value;
+};
 
 const handleClickOutside = (event: MouseEvent) => {
-    if (containerRef.value && !containerRef.value.contains(event.target as Node)) {
-        isOpen.value = false
-    }
-}
+  if (containerRef.value && !containerRef.value.contains(event.target as Node)) {
+    isOpen.value = false;
+  }
+};
 
 const handleKeyDown = (e: KeyboardEvent) => {
-    if (!isOpen.value) {
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-            isOpen.value = true
-        }
-        return
+  if (!isOpen.value) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      isOpen.value = true;
     }
+    return;
+  }
 
-    switch (e.key) {
-        case 'ArrowDown':
-            e.preventDefault()
-            if (filteredSuggestions.value.length > 0) {
-                highlightedIndex.value = (highlightedIndex.value + 1) % filteredSuggestions.value.length
-            }
-            break
-        case 'ArrowUp':
-            e.preventDefault()
-            if (filteredSuggestions.value.length > 0) {
-                highlightedIndex.value = (highlightedIndex.value - 1 + filteredSuggestions.value.length) % filteredSuggestions.value.length
-            }
-            break
-        case 'Enter':
-            if (highlightedIndex.value >= 0 && filteredSuggestions.value[highlightedIndex.value]) {
-                e.preventDefault()
-                selectSuggestion(filteredSuggestions.value[highlightedIndex.value])
-            } else if (isOpen.value) {
-                isOpen.value = false
-            }
-            break
-        case 'Escape':
-            isOpen.value = false
-            break
-        case 'Tab':
-            isOpen.value = false
-            break
-    }
-}
+  switch (e.key) {
+    case 'ArrowDown':
+      e.preventDefault();
+      if (filteredSuggestions.value.length > 0) {
+        highlightedIndex.value = (highlightedIndex.value + 1) % filteredSuggestions.value.length;
+      }
+      break;
+    case 'ArrowUp':
+      e.preventDefault();
+      if (filteredSuggestions.value.length > 0) {
+        highlightedIndex.value =
+          (highlightedIndex.value - 1 + filteredSuggestions.value.length) %
+          filteredSuggestions.value.length;
+      }
+      break;
+    case 'Enter':
+      if (highlightedIndex.value >= 0 && filteredSuggestions.value[highlightedIndex.value]) {
+        e.preventDefault();
+        selectSuggestion(filteredSuggestions.value[highlightedIndex.value]);
+      } else if (isOpen.value) {
+        isOpen.value = false;
+      }
+      break;
+    case 'Escape':
+      isOpen.value = false;
+      break;
+    case 'Tab':
+      isOpen.value = false;
+      break;
+  }
+};
 
 onMounted(() => {
-    document.addEventListener('click', handleClickOutside)
-})
+  document.addEventListener('click', handleClickOutside);
+});
 
 onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside)
-})
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <template>

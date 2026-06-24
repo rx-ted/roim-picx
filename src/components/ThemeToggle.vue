@@ -15,18 +15,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { getTheme, toggleTheme } from '../utils/theme'
+import { ref, onMounted } from 'vue';
+import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { getTheme, toggleTheme } from '../utils/theme';
 
-const currentTheme = ref(getTheme())
+const currentTheme = ref(getTheme());
 
 const handleToggle = () => {
-    currentTheme.value = toggleTheme()
-}
+  currentTheme.value = toggleTheme();
+};
 
 onMounted(() => {
-    currentTheme.value = getTheme()
-})
+  currentTheme.value = getTheme();
+});
 </script>

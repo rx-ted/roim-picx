@@ -1,162 +1,170 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage, ElImage, ElEmpty } from 'element-plus'
-import { faSearch, faCheckCircle, faFolder, faChevronRight } from '@fortawesome/free-solid-svg-icons'
-import { requestListImages, requestAddImagesToAlbum } from '../../utils/request'
-import type { ImgItem, ImgReq } from '../../utils/types'
-import BaseDialog from '../common/BaseDialog.vue'
-import BaseButton from '../common/BaseButton.vue'
-import BaseInput from '../common/BaseInput.vue'
+import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage, ElImage, ElEmpty } from 'element-plus';
+import {
+  faSearch,
+  faCheckCircle,
+  faFolder,
+  faChevronRight,
+} from '@fortawesome/free-solid-svg-icons';
+import { requestListImages, requestAddImagesToAlbum } from '../../utils/request';
+import type { ImgItem, ImgReq } from '../../utils/types';
+import BaseDialog from '../common/BaseDialog.vue';
+import BaseButton from '../common/BaseButton.vue';
+import BaseInput from '../common/BaseInput.vue';
 
 const props = defineProps<{
-    modelValue: boolean
-    albumId: number
-}>()
+  modelValue: boolean;
+  albumId: number;
+}>();
 
-const emit = defineEmits(['update:modelValue', 'success'])
+const emit = defineEmits(['update:modelValue', 'success']);
 
-const { t } = useI18n()
-const loading = ref(false)
-const images = ref<ImgItem[]>([])
-const folders = ref<string[]>([])
-const searchQuery = ref('')
-const selectedKeys = ref<Set<string>>(new Set())
-const delimiter = ref('/')
+const { t } = useI18n();
+const loading = ref(false);
+const images = ref<ImgItem[]>([]);
+const folders = ref<string[]>([]);
+const searchQuery = ref('');
+const selectedKeys = ref<Set<string>>(new Set());
+const delimiter = ref('/');
 
 // Pagination
-const cursor = ref<string | undefined>(undefined)
-const hasMore = ref(true)
+const cursor = ref<string | undefined>(undefined);
+const hasMore = ref(true);
 // For this dialog, we might want simpler pagination or "Load More"
 // Let's use "Load More" button for simplicity inside dialog
-const loadingMore = ref(false)
+const loadingMore = ref(false);
 
 const loadImages = async (reset = true) => {
+  if (reset) {
+    cursor.value = undefined;
+    hasMore.value = true;
+    images.value = [];
+  }
+
+  if (!hasMore.value && !reset) return;
+
+  loading.value = reset;
+  loadingMore.value = !reset;
+
+  try {
+    const res = await requestListImages(<ImgReq>{
+      limit: 24, // 4x6 grid
+      cursor: cursor.value,
+      keyword: searchQuery.value || undefined,
+      delimiter: delimiter.value,
+    });
+
     if (reset) {
-        cursor.value = undefined
-        hasMore.value = true
-        images.value = []
+      images.value = res.list;
+    } else {
+      images.value = [...images.value, ...res.list];
     }
 
-    if (!hasMore.value && !reset) return
-
-    loading.value = reset
-    loadingMore.value = !reset
-
-    try {
-        const res = await requestListImages(<ImgReq>{
-            limit: 24, // 4x6 grid
-            cursor: cursor.value,
-            keyword: searchQuery.value || undefined,
-            delimiter: delimiter.value
-        })
-
-        if (reset) {
-            images.value = res.list
-        } else {
-            images.value = [...images.value, ...res.list]
-        }
-
-        // Store folders from prefixes
-        folders.value = res.prefixes || []
-        cursor.value = res.cursor
-        hasMore.value = res.next
-    } catch (e) {
-        // error
-    } finally {
-        loading.value = false
-        loadingMore.value = false
-    }
-}
+    // Store folders from prefixes
+    folders.value = res.prefixes || [];
+    cursor.value = res.cursor;
+    hasMore.value = res.next;
+  } catch (e) {
+    // error
+  } finally {
+    loading.value = false;
+    loadingMore.value = false;
+  }
+};
 
 const toggleSelect = (key: string) => {
-    if (selectedKeys.value.has(key)) {
-        selectedKeys.value.delete(key)
-    } else {
-        selectedKeys.value.add(key)
-    }
-}
+  if (selectedKeys.value.has(key)) {
+    selectedKeys.value.delete(key);
+  } else {
+    selectedKeys.value.add(key);
+  }
+};
 
 const handleConfirm = async () => {
-    if (selectedKeys.value.size === 0) return
+  if (selectedKeys.value.size === 0) return;
 
-    loading.value = true
-    try {
-        // We need URLs too. Find them from images list.
-        const selectedImages = images.value
-            .filter(img => selectedKeys.value.has(img.key))
-            .map(img => ({ key: img.key, url: img.url }))
+  loading.value = true;
+  try {
+    // We need URLs too. Find them from images list.
+    const selectedImages = images.value
+      .filter((img) => selectedKeys.value.has(img.key))
+      .map((img) => ({ key: img.key, url: img.url }));
 
-        // If some selected images are not in current loaded list (unlikely with this UI flow, but possible if we kept selection across searches?), 
-        // we strictly only add what we have info for.
-        // Actually, preventing selection loss across searches/pagination is complex. 
-        // Let's assume user selects from current visible set or we keep a separate map of selected items.
-        // Since we are adding "existing" images, we might have selected items from previous pages.
-        // But here we are just appending.
+    // If some selected images are not in current loaded list (unlikely with this UI flow, but possible if we kept selection across searches?),
+    // we strictly only add what we have info for.
+    // Actually, preventing selection loss across searches/pagination is complex.
+    // Let's assume user selects from current visible set or we keep a separate map of selected items.
+    // Since we are adding "existing" images, we might have selected items from previous pages.
+    // But here we are just appending.
 
-        // Wait, if I scroll down, I might lose reference if I don't store full object.
-        // `images` accumulates so it's fine.
+    // Wait, if I scroll down, I might lose reference if I don't store full object.
+    // `images` accumulates so it's fine.
 
-        await requestAddImagesToAlbum(props.albumId, selectedImages)
-        ElMessage.success(t('album.updateSuccess'))
-        emit('success')
-        emit('update:modelValue', false)
-    } catch (e) {
-        // error
-    } finally {
-        loading.value = false
-    }
-}
+    await requestAddImagesToAlbum(props.albumId, selectedImages);
+    ElMessage.success(t('album.updateSuccess'));
+    emit('success');
+    emit('update:modelValue', false);
+  } catch (e) {
+    // error
+  } finally {
+    loading.value = false;
+  }
+};
 
 const handleClose = () => {
-    emit('update:modelValue', false)
-    selectedKeys.value.clear()
-    searchQuery.value = ''
-    images.value = []
-}
+  emit('update:modelValue', false);
+  selectedKeys.value.clear();
+  searchQuery.value = '';
+  images.value = [];
+};
 
-watch(() => props.modelValue, (val) => {
+watch(
+  () => props.modelValue,
+  (val) => {
     if (val) {
-        loadImages(true)
+      loadImages(true);
     }
-})
+  },
+);
 
 const handleSearch = () => {
-    loadImages(true)
-}
+  loadImages(true);
+};
 
 // Breadcrumb navigation
 const breadcrumbSegments = computed(() => {
-    if (delimiter.value === '/') return []
-    const path = delimiter.value.replace(/\/$/, '')
-    return path.split('/').filter(s => s.length > 0)
-})
+  if (delimiter.value === '/') return [];
+  const path = delimiter.value.replace(/\/$/, '');
+  return path.split('/').filter((s) => s.length > 0);
+});
 
 const navigateToBreadcrumb = (index: number) => {
-    const segments = breadcrumbSegments.value.slice(0, index + 1)
-    const newPath = segments.join('/') + '/'
-    changeFolder(newPath)
-}
+  const segments = breadcrumbSegments.value.slice(0, index + 1);
+  const newPath = `${segments.join('/')}/`;
+  changeFolder(newPath);
+};
 
 const changeFolder = (path: string) => {
-    delimiter.value = path
-    searchQuery.value = ''
-    loadImages(true)
-}
+  delimiter.value = path;
+  searchQuery.value = '';
+  loadImages(true);
+};
 
 const goToRoot = () => {
-    changeFolder('/')
-}
+  changeFolder('/');
+};
 
 const handleSelectAll = () => {
-    images.value.forEach(img => {
-        selectedKeys.value.add(img.key)
-    })
-}
+  images.value.forEach((img) => {
+    selectedKeys.value.add(img.key);
+  });
+};
 
 const handleClearSelection = () => {
-    selectedKeys.value.clear()
-}
+  selectedKeys.value.clear();
+};
 </script>
 
 <template>

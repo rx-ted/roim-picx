@@ -1,31 +1,31 @@
 <script setup lang="ts">
-import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { useI18n } from 'vue-i18n'
+import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
-    modelValue: string
-    placeholder?: string
-}>()
+  modelValue: string;
+  placeholder?: string;
+}>();
 
-const emit = defineEmits(['update:modelValue', 'search', 'clear'])
-const { t } = useI18n()
+const emit = defineEmits(['update:modelValue', 'search', 'clear']);
+const { t } = useI18n();
 
 const handleInput = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    emit('update:modelValue', target.value)
-}
+  const target = e.target as HTMLInputElement;
+  emit('update:modelValue', target.value);
+};
 
 const handleClear = () => {
-    emit('update:modelValue', '')
-    emit('clear')
-}
+  emit('update:modelValue', '');
+  emit('clear');
+};
 
 const handleKeyup = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-        emit('search')
-    }
-}
+  if (e.key === 'Enter') {
+    emit('search');
+  }
+};
 </script>
 
 <template>
