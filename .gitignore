@@ -7,3 +7,5 @@ dist
 .env
 .env.development
 backup
+.dev.vars
+wrangler.toml
