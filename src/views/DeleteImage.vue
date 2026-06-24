@@ -152,64 +152,72 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
-import { requestDelInfo, requestPublicDeleteImage } from '../utils/request'
-import formatBytes from '../utils/format-bytes'
-import { faExclamationTriangle, faCheckCircle, faTrashAlt, faImage, faHome, faFile, faDatabase } from '@fortawesome/free-solid-svg-icons'
-import LoadingOverlay from '../components/LoadingOverlay.vue'
-import type { ImgItem } from '../utils/types'
-import { ElImage } from 'element-plus'
+import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import { requestDelInfo, requestPublicDeleteImage } from '../utils/request';
+import formatBytes from '../utils/format-bytes';
+import {
+  faExclamationTriangle,
+  faCheckCircle,
+  faTrashAlt,
+  faImage,
+  faHome,
+  faFile,
+  faDatabase,
+} from '@fortawesome/free-solid-svg-icons';
+import LoadingOverlay from '../components/LoadingOverlay.vue';
+import type { ImgItem } from '../utils/types';
+import { ElImage } from 'element-plus';
 
-const route = useRoute()
-const router = useRouter()
-const { t } = useI18n()
-const token = route.params.token as string
+const route = useRoute();
+const router = useRouter();
+const { t } = useI18n();
+const token = route.params.token as string;
 
-const loading = ref(true)
-const deleting = ref(false)
-const deleted = ref(false)
-const error = ref('')
-const imageInfo = ref<ImgItem | null>(null)
+const loading = ref(true);
+const deleting = ref(false);
+const deleted = ref(false);
+const error = ref('');
+const imageInfo = ref<ImgItem | null>(null);
 
 const fetchInfo = async () => {
-    try {
-        loading.value = true
-        error.value = ''
-        const data = await requestDelInfo(token)
-        imageInfo.value = data
-    } catch (err: any) {
-        error.value = err.message || t('deleteImage.fetchInfoFailed')
-    } finally {
-        loading.value = false
-    }
-}
+  try {
+    loading.value = true;
+    error.value = '';
+    const data = await requestDelInfo(token);
+    imageInfo.value = data;
+  } catch (err: any) {
+    error.value = err.message || t('deleteImage.fetchInfoFailed');
+  } finally {
+    loading.value = false;
+  }
+};
 
 const confirmDelete = async () => {
-    try {
-        deleting.value = true
-        await requestPublicDeleteImage(token)
-        deleted.value = true
-    } catch (err: any) {
-        error.value = err.message || t('admin.deleteFailed')
-    } finally {
-        deleting.value = false
-    }
-}
+  try {
+    deleting.value = true;
+    await requestPublicDeleteImage(token);
+    deleted.value = true;
+  } catch (err: any) {
+    error.value = err.message || t('admin.deleteFailed');
+  } finally {
+    deleting.value = false;
+  }
+};
 
 const goHome = () => {
-    router.push('/')
-}
+  router.push('/');
+};
 
 onMounted(() => {
-    if (!token) {
-        error.value = t('deleteImage.invalidToken')
-        loading.value = false
-        return
-    }
-    fetchInfo()
-})
+  if (!token) {
+    error.value = t('deleteImage.invalidToken');
+    loading.value = false;
+    return;
+  }
+  fetchInfo();
+});
 </script>
 
 <style scoped>

@@ -133,72 +133,82 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage, ElTooltip, ElPopconfirm, ElImage, ElImageViewer } from 'element-plus'
-import { requestMyShares, requestDeleteShare, type MyShare } from '../utils/request'
-import LoadingOverlay from '../components/LoadingOverlay.vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faSync, faLock, faLink, faTrash, faEye, faCalendarTimes, faShareAlt, faImage, faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
-import BaseButton from '../components/common/BaseButton.vue'
+import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage, ElTooltip, ElPopconfirm, ElImage, ElImageViewer } from 'element-plus';
+import { requestMyShares, requestDeleteShare, type MyShare } from '../utils/request';
+import LoadingOverlay from '../components/LoadingOverlay.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import {
+  faSync,
+  faLock,
+  faLink,
+  faTrash,
+  faEye,
+  faCalendarTimes,
+  faShareAlt,
+  faImage,
+  faExternalLinkAlt,
+} from '@fortawesome/free-solid-svg-icons';
+import BaseButton from '../components/common/BaseButton.vue';
 
-const { t } = useI18n()
+const { t } = useI18n();
 
-const loading = ref(false)
-const shares = ref<MyShare[]>([])
+const loading = ref(false);
+const shares = ref<MyShare[]>([]);
 
 // Preview state
-const previewVisible = ref(false)
-const previewUrl = ref('')
+const previewVisible = ref(false);
+const previewUrl = ref('');
 
 const fetchMyShares = async () => {
-    loading.value = true
-    try {
-        shares.value = await requestMyShares()
-    } catch (e) {
-        console.error('Failed to fetch shares:', e)
-    } finally {
-        loading.value = false
-    }
-}
+  loading.value = true;
+  try {
+    shares.value = await requestMyShares();
+  } catch (e) {
+    console.error('Failed to fetch shares:', e);
+  } finally {
+    loading.value = false;
+  }
+};
 
 const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString()
-}
+  return new Date(timestamp).toLocaleDateString();
+};
 
 const copyShareLink = async (share: MyShare) => {
-    try {
-        await navigator.clipboard.writeText(share.url)
-        ElMessage.success(t('myShares.linkCopied'))
-    } catch (e) {
-        ElMessage.error(t('myShares.copyFailed'))
-    }
-}
+  try {
+    await navigator.clipboard.writeText(share.url);
+    ElMessage.success(t('myShares.linkCopied'));
+  } catch (e) {
+    ElMessage.error(t('myShares.copyFailed'));
+  }
+};
 
 const openShare = (share: MyShare) => {
-    window.open(share.url, '_blank')
-}
+  window.open(share.url, '_blank');
+};
 
 const deleteShare = async (share: MyShare) => {
-    try {
-        await requestDeleteShare(share.id)
-        shares.value = shares.value.filter(s => s.id !== share.id)
-        ElMessage.success(t('myShares.deleted'))
-    } catch (e) {
-        // Error handled
-    }
-}
+  try {
+    await requestDeleteShare(share.id);
+    shares.value = shares.value.filter((s) => s.id !== share.id);
+    ElMessage.success(t('myShares.deleted'));
+  } catch (e) {
+    // Error handled
+  }
+};
 
 onMounted(() => {
-    fetchMyShares()
-})
+  fetchMyShares();
+});
 
 const openPreview = (url: string) => {
-    previewUrl.value = url
-    previewVisible.value = true
-}
+  previewUrl.value = url;
+  previewVisible.value = true;
+};
 
 const closePreview = () => {
-    previewVisible.value = false
-}
+  previewVisible.value = false;
+};
 </script>

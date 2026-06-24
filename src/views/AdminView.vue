@@ -1,85 +1,88 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElEmpty, ElCard, ElTabs, ElTabPane } from 'element-plus'
+import { ref, onMounted, computed, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElEmpty, ElCard, ElTabs, ElTabPane } from 'element-plus';
 import {
-	faUsers, faChartLine, faClipboardList,
-	faShieldAlt, faCog, faKey
-} from '@fortawesome/free-solid-svg-icons'
-import {
-	requestAdminStats,
-	requestCurrentUser
-} from '../utils/request'
-import type { SystemStats, CurrentUserInfo } from '../utils/types'
-import formatBytes from '../utils/format-bytes'
+  faUsers,
+  faChartLine,
+  faClipboardList,
+  faShieldAlt,
+  faCog,
+  faKey,
+} from '@fortawesome/free-solid-svg-icons';
+import { requestAdminStats, requestCurrentUser } from '../utils/request';
+import type { SystemStats, CurrentUserInfo } from '../utils/types';
+import formatBytes from '../utils/format-bytes';
 
-import AdminStats from '../components/admin/AdminStats.vue'
-import AdminUsers from '../components/admin/AdminUsers.vue'
-import AdminAnalytics from '../components/admin/AdminAnalytics.vue'
-import AdminLogs from '../components/admin/AdminLogs.vue'
-import AdminSettings from '../components/admin/AdminSettings.vue'
-import AdminApiKeys from '../components/admin/AdminApiKeys.vue'
+import AdminStats from '../components/admin/AdminStats.vue';
+import AdminUsers from '../components/admin/AdminUsers.vue';
+import AdminAnalytics from '../components/admin/AdminAnalytics.vue';
+import AdminLogs from '../components/admin/AdminLogs.vue';
+import AdminSettings from '../components/admin/AdminSettings.vue';
+import AdminApiKeys from '../components/admin/AdminApiKeys.vue';
 
-const { t } = useI18n()
+const { t } = useI18n();
 
-const activeTab = ref('users')
+const activeTab = ref('users');
 
 // Component refs
-const usersRef = ref<InstanceType<typeof AdminUsers> | null>(null)
-const analyticsRef = ref<InstanceType<typeof AdminAnalytics> | null>(null)
-const logsRef = ref<InstanceType<typeof AdminLogs> | null>(null)
-const settingsRef = ref<InstanceType<typeof AdminSettings> | null>(null)
-const apiKeysRef = ref<any>(null)
+const usersRef = ref<InstanceType<typeof AdminUsers> | null>(null);
+const analyticsRef = ref<InstanceType<typeof AdminAnalytics> | null>(null);
+const logsRef = ref<InstanceType<typeof AdminLogs> | null>(null);
+const settingsRef = ref<InstanceType<typeof AdminSettings> | null>(null);
+const apiKeysRef = ref<any>(null);
 
 // 当前用户信息
-const currentUserInfo = ref<CurrentUserInfo | null>(null)
-const isAdmin = computed(() => currentUserInfo.value?.role === 'admin' || currentUserInfo.value?.isAdmin)
+const currentUserInfo = ref<CurrentUserInfo | null>(null);
+const isAdmin = computed(
+  () => currentUserInfo.value?.role === 'admin' || currentUserInfo.value?.isAdmin,
+);
 
 // 系统统计
-const systemStats = ref<SystemStats | null>(null)
+const systemStats = ref<SystemStats | null>(null);
 
 const loadCurrentUser = async () => {
-	try {
-		currentUserInfo.value = await requestCurrentUser()
-	} catch (e) {
-		console.error('Failed to load current user:', e)
-	}
-}
+  try {
+    currentUserInfo.value = await requestCurrentUser();
+  } catch (e) {
+    console.error('Failed to load current user:', e);
+  }
+};
 
 const loadSystemStats = async () => {
-	try {
-		systemStats.value = await requestAdminStats()
-	} catch (e) {
-		console.error('Failed to load system stats:', e)
-	}
-}
+  try {
+    systemStats.value = await requestAdminStats();
+  } catch (e) {
+    console.error('Failed to load system stats:', e);
+  }
+};
 
 const handleTabChange = async (tab: string | number) => {
-	// Wait for DOM update so ref is available if it was v-if'ed (though we use el-tabs)
-	await nextTick()
+  // Wait for DOM update so ref is available if it was v-if'ed (though we use el-tabs)
+  await nextTick();
 
-	const tabStr = String(tab)
-	if (tabStr === 'users') {
-		usersRef.value?.init()
-	} else if (tabStr === 'analytics') {
-		analyticsRef.value?.init()
-	} else if (tabStr === 'logs') {
-		logsRef.value?.init()
-	} else if (tabStr === 'settings') {
-		settingsRef.value?.init()
-	} else if (tabStr === 'api-keys') {
-		apiKeysRef.value?.loadApiKeys?.()
-	}
-}
+  const tabStr = String(tab);
+  if (tabStr === 'users') {
+    usersRef.value?.init();
+  } else if (tabStr === 'analytics') {
+    analyticsRef.value?.init();
+  } else if (tabStr === 'logs') {
+    logsRef.value?.init();
+  } else if (tabStr === 'settings') {
+    settingsRef.value?.init();
+  } else if (tabStr === 'api-keys') {
+    apiKeysRef.value?.loadApiKeys?.();
+  }
+};
 
 onMounted(async () => {
-	await loadCurrentUser()
-	if (isAdmin.value) {
-		loadSystemStats()
-		// Initialize the default tab
-		handleTabChange(activeTab.value)
-	}
-})
+  await loadCurrentUser();
+  if (isAdmin.value) {
+    loadSystemStats();
+    // Initialize the default tab
+    handleTabChange(activeTab.value);
+  }
+});
 </script>
 
 <template>

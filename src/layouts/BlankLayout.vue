@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { MY_NAME, MY_REPO_LINK, ORIGINAL_REPO_LINK, ORIGINAL_REPO_NAME } from '../config';
+
 // Blank layout - renders the router view with minimal chrome and footer
-const repoLink = 'https://github.com/roimdev'
-const repoName = 'roim-picx'
+const repoName = 'roim-picx';
 </script>
 
 <template>
@@ -27,11 +28,12 @@ const repoName = 'roim-picx'
                     </router-link>
                 </div>
                 <div class="flex items-center">
-                    <span class="mr-1">Powered by</span>
-                    <a :href="repoLink" target="_blank"
+                    <span class="mr-1">Powered by <a  target="_blank" :href="MY_REPO_LINK"  class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors hover:underline">{{ MY_NAME }}</a> (· based on</span>
+                    <a :href="ORIGINAL_REPO_LINK" target="_blank"
                         class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors hover:underline">
-                        {{ repoName }}
+                        {{ORIGINAL_REPO_NAME  }}
                     </a>
+                    <span>)</span>
                 </div>
             </div>
         </div>

@@ -1,89 +1,151 @@
 <script setup lang="ts">
-import { faCog, faUpload, faSignOutAlt, faUserCircle, faShieldAlt, faBars, faChevronRight, faShareAlt, faFolder } from '@fortawesome/free-solid-svg-icons'
-import { useRouter, useRoute } from 'vue-router'
-import { ElAvatar, ElDropdown, ElDropdownMenu, ElDropdownItem, ElMessage, ElMessageBox } from 'element-plus'
-import { computed, onMounted, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import storage from '../utils/storage'
-import ThemeToggle from '../components/ThemeToggle.vue'
-import LanguageSwitcher from '../components/LanguageSwitcher.vue'
-import { parseUserFromToken } from '../utils/jwt'
-import type { User } from '../utils/types'
-import { requestCurrentUser } from '../utils/request'
+import {
+  faCog,
+  faUpload,
+  faSignOutAlt,
+  faUserCircle,
+  faShieldAlt,
+  faBars,
+  faChevronRight,
+  faShareAlt,
+  faFolder,
+} from '@fortawesome/free-solid-svg-icons';
+import { useRouter, useRoute } from 'vue-router';
+import {
+  ElAvatar,
+  ElDialog,
+  ElDropdown,
+  ElDropdownMenu,
+  ElDropdownItem,
+  ElMessage,
+  ElMessageBox,
+} from 'element-plus';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import storage from '../utils/storage';
+import ThemeToggle from '../components/ThemeToggle.vue';
+import LanguageSwitcher from '../components/LanguageSwitcher.vue';
+import { parseUserFromToken } from '../utils/jwt';
+import type { User } from '../utils/types';
+import { requestCurrentUser } from '../utils/request';
+import LoginDialog from '../components/LoginDialog.vue';
+import { MY_NAME, MY_REPO_LINK, ORIGINAL_AUTHOR_NAME, ORIGINAL_REPO_LINK } from '../config';
+import { useAuth } from '../composables/useAuth';
 
-const { t } = useI18n()
-const router = useRouter()
-const route = useRoute()
+const { t } = useI18n();
+const router = useRouter();
+const route = useRoute();
 
-const repoLink = 'https://github.com/roimdev'
-const repoName = 'roim-picx'
+const { token, updateToken, clearToken } = useAuth();
+const currentUser = ref<User | null>(null);
+const isAdmin = ref(false);
 
-const token = ref(storage.local.get('auth-token'))
-const currentUser = ref<User | null>(null)
-const isAdmin = ref(false)
+const publicRoutes = ['/', '/up', '/auth', '/privacy', '/terms'];
 
 const updateUserInfo = async () => {
-    const t = storage.local.get('auth-token')
-    token.value = t
-    if (t) {
-        currentUser.value = parseUserFromToken(t.token)
-        try {
-            const userInfo = await requestCurrentUser()
-            isAdmin.value = userInfo.role === 'admin' || userInfo.isAdmin === true
-        } catch (e) {
-            isAdmin.value = false
-        }
-    } else {
-        currentUser.value = null
-        isAdmin.value = false
+  const t = storage.local.get('auth-token');
+  token.value = t;
+  if (t) {
+    const parsed = parseUserFromToken(t.token);
+    if (!parsed) {
+      clearToken();
+      currentUser.value = null;
+      isAdmin.value = false;
+      return;
     }
-}
+    currentUser.value = parsed;
+    // 公开页面不发起 API 验证（避免 401 触发拦截器跳转）
+    if (publicRoutes.includes(route.path)) {
+      isAdmin.value = false;
+      return;
+    }
+    try {
+      const userInfo = await requestCurrentUser();
+      isAdmin.value = userInfo.role === 'admin' || userInfo.isAdmin === true;
+    } catch {
+      clearToken();
+      currentUser.value = null;
+      isAdmin.value = false;
+    }
+  } else {
+    currentUser.value = null;
+    isAdmin.value = false;
+  }
+};
 
-watch(() => route.path, () => {
-    updateUserInfo()
-})
+watch(
+  () => route.path,
+  () => {
+    updateUserInfo();
+  },
+);
 
 const navItems = computed(() => {
-    const items = [
-        { path: '/up', label: t('nav.upload'), icon: faUpload },
-        { path: '/', label: t('nav.manage'), icon: faCog },
-        { path: '/albums', label: t('nav.albums'), icon: faFolder },
-        { path: '/shares', label: t('nav.myShares'), icon: faShareAlt }
-    ]
-    if (isAdmin.value) {
-        items.push({ path: '/admin', label: t('nav.admin'), icon: faShieldAlt })
-    }
-    return items
-})
+  return [
+    { path: '/up', label: t('nav.upload'), icon: faUpload },
+    { path: '/', label: t('nav.manage'), icon: faCog },
+    { path: '/albums', label: t('nav.albums'), icon: faFolder },
+    { path: '/shares', label: t('nav.myShares'), icon: faShareAlt },
+  ];
+});
 
 onMounted(() => {
-    updateUserInfo()
-})
+  updateUserInfo();
+});
 
 const handleNavClick = (item: any) => {
-    router.push(item.path)
-}
+  router.push(item.path);
+};
+
+const showLoginDialog = ref(false);
+const redirectPath = ref('/');
+
+const onLoginSuccess = () => {
+  showLoginDialog.value = false;
+  updateToken();
+  updateUserInfo();
+  router.push(redirectPath.value);
+};
+
+const handleAdminClick = async () => {
+  if (token.value) {
+    router.push('/admin');
+    return;
+  }
+  redirectPath.value = '/admin';
+  showLoginDialog.value = true;
+};
+
+const openLogin = () => {
+  redirectPath.value = route.path;
+  showLoginDialog.value = true;
+};
+
+const handleCommand = (cmd: string) => {
+  if (cmd === 'logout') {
+    logout();
+  } else if (cmd === '/admin') {
+    handleAdminClick();
+  } else {
+    router.push(cmd);
+  }
+};
 
 const logout = async () => {
-    try {
-        await ElMessageBox.confirm(
-            t('nav.logoutConfirmMsg'),
-            t('nav.logoutConfirmTitle'),
-            {
-                confirmButtonText: t('common.confirm'),
-                cancelButtonText: t('common.cancel'),
-                type: 'warning',
-            }
-        )
-        storage.local.remove('auth-token')
-        token.value = ''
-        currentUser.value = null
-        ElMessage.success(t('nav.logout'))
-        router.push('/auth')
-    } catch (e) {
-        // User cancelled
-    }
-}
+  try {
+    await ElMessageBox.confirm(t('nav.logoutConfirmMsg'), t('nav.logoutConfirmTitle'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
+      type: 'warning',
+    });
+    clearToken();
+    currentUser.value = null;
+    ElMessage.success(t('nav.logout'));
+    router.push('/');
+  } catch (e) {
+    // User cancelled
+  }
+};
 </script>
 
 <template>
@@ -111,34 +173,55 @@ const logout = async () => {
                         </div>
                     </div>
 
-                    <!-- User Profile / Logout (Desktop Only) -->
+                    <!-- User Profile / Admin (Desktop Only) -->
                     <div v-if="token"
                         class="hidden md:flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-700 ml-2">
-                        <div class="flex items-center gap-2 group relative cursor-pointer" @click="logout"
-                            title="点击退出登录">
-                            <div class="relative">
-                                <el-avatar :size="32" :src="currentUser?.avatar_url"
-                                    class="ring-2 ring-white dark:ring-gray-800 shadow-sm transition-transform group-hover:scale-105">
-                                    <template #default>
-                                        <font-awesome-icon :icon="faUserCircle" class="text-xl text-gray-400" />
-                                    </template>
-                                </el-avatar>
-                                <span v-if="!currentUser"
-                                    class="absolute -bottom-1 -right-1 w-3 h-3 bg-gray-400 rounded-full border-2 border-white dark:border-gray-800"
-                                    title="Admin Token"></span>
-                                <span v-else
-                                    class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"
-                                    title="Oauth"></span>
+                        <el-dropdown trigger="click" @command="handleCommand">
+                            <div class="flex items-center gap-2 group relative cursor-pointer">
+                                <div class="relative">
+                                    <el-avatar :size="32" :src="currentUser?.avatar_url"
+                                        class="ring-2 ring-white dark:ring-gray-800 shadow-sm transition-transform group-hover:scale-105">
+                                        <template #default>
+                                            <font-awesome-icon :icon="faUserCircle" class="text-xl text-gray-400" />
+                                        </template>
+                                    </el-avatar>
+                                    <span v-if="!currentUser"
+                                        class="absolute -bottom-1 -right-1 w-3 h-3 bg-gray-400 rounded-full border-2 border-white dark:border-gray-800"
+                                        title="Admin Token"></span>
+                                    <span v-else
+                                        class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"
+                                        title="Oauth"></span>
+                                </div>
+                                <div class="hidden lg:flex flex-col items-start leading-none gap-1">
+                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-200">{{
+                                        currentUser?.name || 'Administrator' }}</span>
+                                    <span class="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{{
+                                        currentUser ? 'Oauth' : 'System' }}</span>
+                                </div>
                             </div>
-                            <div class="hidden lg:flex flex-col items-start leading-none gap-1">
-                                <span class="text-xs font-bold text-gray-700 dark:text-gray-200">{{
-                                    currentUser?.name || 'Administrator' }}</span>
-                                <span class="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{{
-                                    currentUser ? 'Oauth' : 'System' }}</span>
-                            </div>
-                            <div
-                                class="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/10 rounded-full md:rounded-lg transition-colors -m-1">
-                            </div>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item command="/admin">
+                                        <div class="flex items-center gap-3">
+                                            <font-awesome-icon :icon="faShieldAlt" class="w-4" />
+                                            <span>{{ t('nav.admin') }}</span>
+                                        </div>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item command="logout" divided class="!text-red-500">
+                                        <div class="flex items-center gap-3">
+                                            <font-awesome-icon :icon="faSignOutAlt" class="w-4" />
+                                            <span>{{ t('nav.logout') }}</span>
+                                        </div>
+                                    </el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </div>
+                    <div v-else
+                        class="hidden md:flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-700 ml-2">
+                        <div class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors cursor-pointer"
+                            @click="openLogin">
+                            <font-awesome-icon :icon="faUserCircle" class="text-xl" />
                         </div>
                     </div>
 
@@ -159,8 +242,7 @@ const logout = async () => {
 
                     <!-- Mobile Menu Icon (Far Right) -->
                     <div class="md:hidden flex items-center border-l border-gray-200 dark:border-gray-700 pl-2">
-                        <el-dropdown trigger="click"
-                            @command="(cmd: string) => cmd === 'logout' ? logout() : router.push(cmd)">
+                        <el-dropdown trigger="click" @command="handleCommand">
                             <div
                                 class="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer">
                                 <font-awesome-icon :icon="faBars" class="text-xl" />
@@ -172,6 +254,15 @@ const logout = async () => {
                                             <div class="flex items-center gap-3">
                                                 <font-awesome-icon :icon="item.icon" class="w-4" />
                                                 <span>{{ item.label }}</span>
+                                            </div>
+                                            <font-awesome-icon :icon="faChevronRight" class="text-[10px] opacity-30" />
+                                        </div>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item command="/admin">
+                                        <div class="flex items-center justify-between w-full py-1">
+                                            <div class="flex items-center gap-3">
+                                                <font-awesome-icon :icon="faShieldAlt" class="w-4" />
+                                                <span>{{ t('nav.admin') }}</span>
                                             </div>
                                             <font-awesome-icon :icon="faChevronRight" class="text-[10px] opacity-30" />
                                         </div>
@@ -210,13 +301,23 @@ const logout = async () => {
                     </router-link>
                 </div>
                 <div class="flex items-center">
-                    <span class="mr-1">Powered by</span>
-                    <a :href="repoLink" target="_blank"
+                    <span class="mr-1">Powered by </span>
+                    <a :href="MY_REPO_LINK" target="_blank"
+                        class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors hover:underline">{{
+                            MY_NAME }}</a> <span>&nbsp;(based on &nbsp;</span>
+                    <a :href="ORIGINAL_REPO_LINK" target="_blank"
                         class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors hover:underline">
-                        {{ repoName }}
+                        {{ ORIGINAL_AUTHOR_NAME }}
                     </a>
+                    <span>)</span>
                 </div>
             </div>
         </div>
+
+        <!-- Login Dialog -->
+        <el-dialog v-model="showLoginDialog" :title="$t('auth.login')" width="420px" :close-on-click-modal="false"
+            class="login-dialog" destroy-on-close>
+            <LoginDialog :dialog="true" @login-success="onLoginSuccess" />
+        </el-dialog>
     </div>
 </template>

@@ -66,7 +66,7 @@
             <a :href="`mailto:${CONTACT_EMAIL}`" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ CONTACT_EMAIL }}</a>
           </div>
           <div>
-            <a :href="ISSUES_URL" target="_blank" rel="noopener" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ ISSUES_URL }}</a>
+            <a :href="REPO_ISSUES_URL" target="_blank" rel="noopener" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ REPO_ISSUES_URL }}</a>
           </div>
         </div>
       </section>
@@ -75,15 +75,17 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
-import { computed } from 'vue'
-import { SITE_NAME, LAST_UPDATED, CONTACT_EMAIL, ISSUES_URL } from '../config'
+import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
+import { SITE_NAME, LAST_UPDATED, CONTACT_EMAIL, REPO_ISSUES_URL } from '../config';
 
-const { locale } = useI18n()
+const { locale } = useI18n();
 const formattedDate = computed(() => {
-  const d = new Date(LAST_UPDATED)
+  const d = new Date(LAST_UPDATED);
   return new Intl.DateTimeFormat(locale.value === 'zh-CN' ? 'zh-CN' : 'en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  }).format(d)
-})
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(d);
+});
 </script>

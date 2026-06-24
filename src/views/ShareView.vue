@@ -88,69 +88,86 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
-import { faSpinner, faLock, faUnlock, faEye, faDownload, faExclamationTriangle, faExclamationCircle, faArrowRight } from '@fortawesome/free-solid-svg-icons'
-import { ElImageViewer, ElMessage, ElCard } from 'element-plus'
-import { requestGetShareInfo, requestVerifyShare, type ShareDetail, type ShareImageResult } from '../utils/request'
-import BaseInput from '../components/common/BaseInput.vue'
-import BaseButton from '../components/common/BaseButton.vue'
+import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
+import {
+  faSpinner,
+  faLock,
+  faUnlock,
+  faEye,
+  faDownload,
+  faExclamationTriangle,
+  faExclamationCircle,
+  faArrowRight,
+} from '@fortawesome/free-solid-svg-icons';
+import { ElImageViewer, ElMessage, ElCard } from 'element-plus';
+import {
+  requestGetShareInfo,
+  requestVerifyShare,
+  type ShareDetail,
+  type ShareImageResult,
+} from '../utils/request';
+import BaseInput from '../components/common/BaseInput.vue';
+import BaseButton from '../components/common/BaseButton.vue';
 
-const route = useRoute()
-const { t } = useI18n()
-const shareId = route.params.id as string
+const route = useRoute();
+const { t } = useI18n();
+const shareId = route.params.id as string;
 
-const loading = ref(true)
-const error = ref(false)
-const errorTitle = ref('')
-const errorMessage = ref('')
+const loading = ref(true);
+const error = ref(false);
+const errorTitle = ref('');
+const errorMessage = ref('');
 
-const shareInfo = ref<ShareDetail | null>(null)
-const needPassword = ref(false)
-const password = ref('')
-const passwordError = ref('')
-const verifying = ref(false)
+const shareInfo = ref<ShareDetail | null>(null);
+const needPassword = ref(false);
+const password = ref('');
+const passwordError = ref('');
+const verifying = ref(false);
 
-const imageUrl = ref('')
-const imageName = ref('shared-image')
-const shareResult = ref<ShareImageResult | null>(null)
-const showPreview = ref(false)
+const imageUrl = ref('');
+const imageName = ref('shared-image');
+const shareResult = ref<ShareImageResult | null>(null);
+const showPreview = ref(false);
 
 onMounted(async () => {
-    try {
-        shareInfo.value = await requestGetShareInfo(shareId)
-        needPassword.value = shareInfo.value.hasPassword
+  try {
+    shareInfo.value = await requestGetShareInfo(shareId);
+    needPassword.value = shareInfo.value.hasPassword;
 
-        // If no password required, get image directly
-        if (!needPassword.value) {
-            await verifyPassword()
-        }
-    } catch (e: any) {
-        error.value = true
-        errorTitle.value = t('share.linkExpiredTitle')
-        errorMessage.value = e
-    } finally {
-        loading.value = false
+    // If no password required, get image directly
+    if (!needPassword.value) {
+      await verifyPassword();
     }
-})
+  } catch (e: any) {
+    error.value = true;
+    errorTitle.value = t('share.linkExpiredTitle');
+    errorMessage.value = e;
+  } finally {
+    loading.value = false;
+  }
+});
 
 const verifyPassword = async () => {
-    verifying.value = true
-    try {
-        const result = await requestVerifyShare(shareId, needPassword.value ? password.value : undefined)
-        shareResult.value = result
-        imageUrl.value = result.imageUrl
-        imageName.value = result.imageKey.split('/').pop() || 'image'
-    } catch (e: any) {
-        passwordError.value = e
-    } finally {
-        verifying.value = false
-    }
-}
+  verifying.value = true;
+  try {
+    const result = await requestVerifyShare(
+      shareId,
+      needPassword.value ? password.value : undefined,
+    );
+    shareResult.value = result;
+    imageUrl.value = result.imageUrl;
+    imageName.value = result.imageKey.split('/').pop() || 'image';
+  } catch (e: any) {
+    passwordError.value = e;
+  } finally {
+    verifying.value = false;
+  }
+};
 const handleDownload = () => {
-    if (imageUrl.value) {
-        window.open(imageUrl.value, '_blank')
-    }
-}
+  if (imageUrl.value) {
+    window.open(imageUrl.value, '_blank');
+  }
+};
 </script>
