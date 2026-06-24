@@ -7,6 +7,7 @@ router.beforeEach((to, from, next) => {
   // 不需要授权的页面
   if (
     path === '/' ||
+    path === '/manage' ||
     path === '/up' ||
     path === '/auth' ||
     path.startsWith('/delete') ||

@@ -9,6 +9,7 @@ import {
   faChevronRight,
   faShareAlt,
   faFolder,
+  faHome,
 } from '@fortawesome/free-solid-svg-icons';
 import { useRouter, useRoute } from 'vue-router';
 import {
@@ -82,8 +83,9 @@ watch(
 
 const navItems = computed(() => {
   return [
+    { path: '/', label: t('nav.home'), icon: faHome },
     { path: '/up', label: t('nav.upload'), icon: faUpload },
-    { path: '/', label: t('nav.manage'), icon: faCog },
+    { path: '/manage', label: t('nav.manage'), icon: faCog },
     { path: '/albums', label: t('nav.albums'), icon: faFolder },
     { path: '/shares', label: t('nav.myShares'), icon: faShareAlt },
   ];

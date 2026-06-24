@@ -2,14 +2,10 @@ import { createI18n } from 'vue-i18n';
 import zhCN from './zh-CN';
 import enUS from './en-US';
 
-// Get saved locale from localStorage or use browser language
+// Get saved locale from localStorage or default to English
 function getDefaultLocale(): string {
   const saved = localStorage.getItem('locale');
   if (saved) return saved;
-
-  // Detect browser language
-  const browserLang = navigator.language;
-  if (browserLang.startsWith('zh')) return 'zh-CN';
   return 'en-US';
 }
 

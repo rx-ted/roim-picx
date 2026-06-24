@@ -34,6 +34,7 @@ export default {
     exit: 'Exit',
   },
   nav: {
+    home: 'Home',
     upload: 'Upload',
     manage: 'Manage',
     albums: 'Albums',
@@ -456,7 +457,7 @@ export default {
     dataCollectionContent:
       'When you use our service, we may collect the following types of information:',
     dataCollectionItem1:
-      'Account information: When you log in via GitHub, Google, or Steam, we collect your username, avatar, and public email address.',
+      'Account information: When you log in via GitHub or Google, we collect your username, avatar, and email address. Google login accesses your OpenID identifier, email, and basic profile (name, avatar). GitHub login accesses your public GitHub profile.',
     dataCollectionItem2:
       'Uploaded content: Images you upload and related metadata (filename, size, type, upload time, etc.).',
     dataCollectionItem3:
@@ -477,8 +478,7 @@ export default {
     thirdPartyContent: 'Our service integrates with the following third-party platforms:',
     thirdPartyItem1: 'GitHub: For user authentication and login.',
     thirdPartyItem2: 'Google: For user authentication and login.',
-    thirdPartyItem3: 'Steam: For user authentication and login.',
-    thirdPartyItem4: 'Cloudflare: For image storage (R2) and database (D1).',
+    thirdPartyItem3: 'Cloudflare: For image storage (R2) and database (D1).',
     userRightsTitle: 'Your Rights',
     userRightsContent: 'You have the following rights regarding your personal information:',
     userRightsItem1: 'Right to access: You can view the personal information we hold about you.',
@@ -550,5 +550,41 @@ export default {
     updateSuccess: 'Tags updated successfully',
     updateFailed: 'Failed to update tags',
     noTags: 'No tags',
+  },
+  home: {
+    heroTitle: "rx-ted's picx",
+    heroSubtitle:
+      'A fast, reliable image hosting service. Upload, manage, share, and organize your images with ease.',
+    startUpload: 'Start Uploading',
+    browseImages: 'Browse Images',
+    featuresTitle: 'Everything you need for image hosting',
+    featuresSubtitle: 'A complete set of tools to handle your images from upload to sharing.',
+    featUploadTitle: 'Upload',
+    featUploadDesc: 'Drag & drop, batch upload, smart compression, and automatic NSFW detection.',
+    featManageTitle: 'Manage',
+    featManageDesc: 'Browse, search, filter, tag, and organize your images into folders.',
+    featShareTitle: 'Share',
+    featShareDesc: 'Create share links with password protection, expiry dates, and view limits.',
+    featAlbumTitle: 'Albums',
+    featAlbumDesc: 'Organize images into albums. Share entire albums with custom settings.',
+    dataTitle: 'How we use your data',
+    dataSubtitle: 'Transparency about the information we collect and why.',
+    dataAuthTitle: 'Authentication',
+    dataAuthDesc:
+      'We use Google or GitHub login only to verify your identity. Google login accesses your OpenID identifier, email address, and basic profile (name, avatar). GitHub login accesses your public GitHub profile.',
+    dataImagesTitle: 'Your Images',
+    dataImagesDesc:
+      'Uploaded images are stored securely and are private by default. Only you can see your uploads unless you choose to share them.',
+    dataPrivacyTitle: 'Privacy First',
+    dataPrivacyDesc:
+      'We do not sell, share, or distribute your personal data or uploaded content to third parties.',
+    dataContactTitle: 'Contact',
+    dataContactDesc:
+      'If you have questions about your data, you can reach us via email or GitHub issues.',
+    dataMore: 'For more details, please read our',
+    privacyLink: 'Privacy Policy',
+    ctaTitle: 'Ready to get started?',
+    ctaSubtitle:
+      'Upload your first image in seconds. No registration required to browse public images.',
   },
 };

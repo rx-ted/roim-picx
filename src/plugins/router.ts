@@ -11,7 +11,13 @@ const router = createRouter({
       children: [
         {
           path: '',
+          component: () => import('../views/HomeView.vue'),
+          meta: { public: true },
+        },
+        {
+          path: 'manage',
           component: () => import('../views/ManageImages.vue'),
+          meta: { public: true },
         },
         {
           path: 'up',
