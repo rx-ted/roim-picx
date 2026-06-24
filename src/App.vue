@@ -1,23 +1,22 @@
 <script setup lang="ts">
-import { ElScrollbar, ElConfigProvider } from 'element-plus'
-import zhCn from 'element-plus/es/locale/lang/zh-cn'
-import en from 'element-plus/es/locale/lang/en'
-import { computed, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { initTheme } from './utils/theme'
-import { SITE_NAME } from './config'
+import { ElScrollbar, ElConfigProvider } from 'element-plus';
+import zhCn from 'element-plus/es/locale/lang/zh-cn';
+import en from 'element-plus/es/locale/lang/en';
+import { computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { initTheme } from './utils/theme';
+import { SITE_NAME } from './config';
 
-const { locale } = useI18n()
+const { locale } = useI18n();
 
 // Element Plus locale based on current i18n locale
-const elLocale = computed(() => locale.value.startsWith('zh') ? zhCn : en)
+const elLocale = computed(() => (locale.value.startsWith('zh') ? zhCn : en));
 
-const appName = SITE_NAME
-document.title = appName
+document.title = SITE_NAME;
 
 onMounted(() => {
-	initTheme()
-})
+  initTheme();
+});
 </script>
 
 <template>
