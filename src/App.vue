@@ -9,13 +9,13 @@ import { SITE_NAME } from './config';
 
 const { locale } = useI18n();
 
-// Element Plus locale based on current i18n locale
+// Element Plus locale based on current i18n locale, default en
 const elLocale = computed(() => (locale.value.startsWith('zh') ? zhCn : en));
 
 document.title = SITE_NAME;
 
 onMounted(() => {
-  initTheme();
+	initTheme();
 });
 </script>
 
